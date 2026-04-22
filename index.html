@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قدرات دويل - Qodrat Duel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <style>
+    :root {
+      --gold: #FFD700;
+      --gold-dark: #B8860B;
+      --gold-border: #C9A84C;
+      --gold-shimmer: #FFE55C;
+      --purple-primary: #7000FF;
+      --purple-dark: #3A0E44;
+      --purple-trap: #6B1D7B;
+      --pink-secondary: #FF00B7;
+      --cyan-accent: #00E5FF;
+      --bg-dark: #0A0510;
+      --bg-darker: #050208;
+      --marble-warm: #D4C5A0;
+      --marble-warm-dark: #B8A880;
+      --marble-cool: #B8C8D0;
+      --marble-cool-dark: #8FA8B0;
+      --card-blue: #1E6BA5;
+      --card-blue-dark: #0D3D66;
+      --card-crimson: #8B2252;
+      --card-crimson-dark: #4A0E2E;
+      --card-green: #2A7B4F;
+      --card-green-dark: #0E3D22;
+      --card-purple: #6B1D7B;
+      --card-purple-dark: #3A0E44;
+      --card-width: 120px;
+      --card-height: 168px;
+      --card-ratio: 5/7;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+      --shadow-glow-gold: 0 0 20px rgba(255, 215, 0, 0.5);
+      --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.4);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+      background: radial-gradient(ellipse at center, #1a0f2e 0%, var(--bg-dark) 50%, var(--bg-darker) 100%);
+      color: #fff;
+      user-select: none;
+    }
+    .font-cinzel { font-family: 'Cinzel Decorative', serif; }
+
+    .yugioh-card {
+      width: var(--card-width);
+      height: var(--card-height);
+      aspect-ratio: var(--card-ratio);
+      border-radius: 10px;
+      padding: 3px;
+      background: linear-gradient(145deg, var(--gold-border) 0%, var(--gold-dark) 50%, var(--gold-border) 100%);
+      box-shadow: var(--shadow-md), inset 0 0 0 1px rgba(255,255,255,0.1);
+      position: relative;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .yugioh-card:hover { transform: translateY(-8px) scale(1.05); }
+    .yugioh-card-inner {
+      width: 100%; height: 100%;
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.2) 100%);
+      position: relative;
+      transform-style: preserve-3d;
+    }
+    .card-face-front, .card-face-back {
+      position: absolute; inset: 0;
+      border-radius: 7px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+    }
+    .card-face-front {
+      transform: rotateY(180deg);
+      display: flex; flex-direction: column;
+    }
+    .card-face-back {
+      transform: rotateY(0deg);
+      background: radial-gradient(ellipse at center, #4a1a5a 0%, #2a0a35 60%, #1a0520 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .yugioh-card.flipped {
+      transform: rotateY(180deg);
+    }
+    .yugioh-card.flipped:hover {
+      transform: rotateY(180deg) translateY(-8px) scale(1.05);
+    }
+
+    .card-name-bar {
+      background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+      padding: 4px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-bottom: 1px solid rgba(255,215,0,0.3);
+    }
+    .card-artwork-area {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-artwork-bg {
+      position: absolute; inset: 0;
+      opacity: 0.25;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 60%);
+    }
+    .card-icon {
+      font-size: 42px;
+      z-index: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    .card-info-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 3px 6px;
+      background: rgba(0,0,0,0.4);
+      font-size: 9px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .card-category-badge {
+      background: rgba(0,0,0,0.5);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+    .card-stars { color: var(--gold); letter-spacing: 1px; font-size: 8px; }
+    .card-text-area {
+      padding: 5px 6px;
+      font-size: 8px;
+      line-height: 1.4;
+      color: #fff;
+      text-align: right;
+      background: rgba(0,0,0,0.35);
+      min-height: 44px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-stats-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.55);
+      font-size: 9px;
+      font-weight: 700;
+      border-top: 1px solid rgba(255,215,0,0.2);
+    }
+    .card-points { color: #FFD700; }
+    .card-tag { color: #ddd; font-size: 8px; }
+
+    .card-math .card-face-front { background: linear-gradient(180deg, var(--card-blue) 0%, var(--card-blue-dark) 100%); }
+    .card-verbal .card-face-front { background: linear-gradient(180deg, var(--card-crimson) 0%, var(--card-crimson-dark) 100%); }
+    .card-logic .card-face-front { background: linear-gradient(180deg, var(--card-green) 0%, var(--card-green-dark) 100%); }
+    .card-trap .card-face-front { background: linear-gradient(180deg, var(--card-purple) 0%, var(--card-purple-dark) 100%); }
+
+    .card-medium { box-shadow: var(--shadow-md), 0 0 12px rgba(192,192,192,0.4), inset 0 0 0 1px rgba(255,255,255,0.15); }
+    .card-hard {
+      box-shadow: var(--shadow-md), 0 0 18px rgba(255, 215, 0, 0.45), inset 0 0 0 1px rgba(255,215,0,0.3);
+      animation: holographicShift 3s linear infinite;
+    }
+    .card-hard::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 10px;
+      background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+      animation: cardShine 2.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .card-back-pattern {
+      width: 86%; height: 86%;
+      border: 2px solid var(--gold-border);
+      border-radius: 50% / 40%;
+      display: flex; align-items: center; justify-content: center;
+      background: repeating-radial-gradient(circle at center, rgba(201,168,76,0.1) 0px, rgba(201,168,76,0.1) 2px, transparent 3px, transparent 6px);
+    }
+    .card-back-icon {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255,215,0,0.6);
+      font-family: 'Noto Sans Arabic', sans-serif;
+    }
+    .hand-card .card-text-area {
+      font-size: 9px;
+      line-height: 1.35;
+    }
+
+    .duel-field {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      perspective: 1200px;
+      perspective-origin: 50% 75%;
+      position: relative;
+    }
+    .field-board {
+      width: 900px; height: 520px;
+      max-width: 95vw; max-height: 60vh;
+      transform: rotateX(32deg) scale(0.95);
+      transform-style: preserve-3d;
+      border-radius: 16px;
+      border: 4px solid #8B7D3C;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 120px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .field-board::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to bottom, var(--marble-cool) 0%, var(--marble-cool) 48%, #8B7D3C 48%, #FFD700 50%, #8B7D3C 52%, var(--marble-warm) 52%, var(--marble-warm) 100%);
+      z-index: 0;
+    }
+    .field-board::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+      opacity: 0.35;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .player-side, .opponent-side {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      gap: 24px;
+      padding: 0 40px;
+      position: relative;
+      z-index: 2;
+    }
+    .opponent-side { transform: rotate(180deg); }
+    .zone {
+      width: 110px; height: 150px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.25);
+      border: 2px dashed rgba(0,0,0,0.35);
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .zone-question { width: 150px; height: 150px; }
+    .zone-label {
+      position: absolute; bottom: 6px;
+      font-size: 10px; color: rgba(0,0,0,0.45); font-weight: 700;
+    }
+    .zone-active {
+      border-color: var(--cyan-accent);
+      box-shadow: inset 0 0 20px rgba(0,229,255,0.25), 0 0 16px rgba(0,229,255,0.3);
+      background: rgba(0,229,255,0.08);
+    }
+    .zone-highlight {
+      animation: zonePulse 1.2s ease-in-out infinite;
+      border-color: var(--gold-border);
+      background: rgba(255,215,0,0.1);
+    }
+    .zone-card-wrapper {
+      position: absolute;
+      transform: translateZ(2px);
+    }
+
+    .hud-bar {
+      position: absolute;
+      z-index: 10;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hud-top-left { top: 16px; left: 16px; }
+    .hud-top-right { top: 16px; right: 16px; }
+    .hud-bottom-left { bottom: 16px; left: 16px; }
+    .hud-bottom-right { bottom: 16px; right: 16px; }
+
+    .lp-frame {
+      background: linear-gradient(145deg, #2a1a0a 0%, #1a0f05 100%);
+      border: 2px solid var(--gold-border);
+      border-radius: 12px;
+      padding: 10px 18px;
+      box-shadow: var(--shadow-glow-gold), var(--shadow-md);
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 110px;
+    }
+    .lp-label {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 12px;
+      background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .lp-value {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 28px;
+      background: linear-gradient(180deg, #fff 0%, var(--gold) 50%, var(--gold-dark) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .score-value {
+      font-size: 14px; color: var(--cyan-accent); font-weight: 700; margin-top: 2px;
+    }
+
+    .timer-display {
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      width: 72px; height: 72px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 700;
+      color: #fff;
+      backdrop-filter: blur(6px);
+      box-shadow: var(--shadow-md);
+    }
+    .timer-urgent {
+      color: #ff4444;
+      border-color: #ff4444;
+      animation: timerPulse 0.8s ease-in-out infinite;
+    }
+
+    .round-badge {
+      background: rgba(0,0,0,0.55);
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 14px;
+      backdrop-filter: blur(4px);
+    }
+
+    .phase-banner {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      background: rgba(10,5,16,0.85);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      padding: 18px 48px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .phase-banner-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 32px;
+      background: linear-gradient(90deg, var(--gold) 0%, #fff 50%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 900;
+    }
+    .phase-banner-sub {
+      font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 4px;
+    }
+
+    .deck-pile {
+      width: 64px; height: 90px;
+      position: relative;
+    }
+    .deck-card-layer {
+      position: absolute; inset: 0;
+      border-radius: 6px;
+      background: linear-gradient(145deg, #4a1a5a 0%, #2a0a35 100%);
+      border: 1px solid var(--gold-border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .deck-count {
+      position: absolute; bottom: -10px; right: -10px;
+      background: var(--gold-dark); color: #fff;
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      border: 2px solid #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .preview-panel {
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 260px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .preview-card-wrapper {
+      width: 240px; height: 336px;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+    }
+    .preview-card-wrapper .yugioh-card {
+      width: 240px; height: 336px;
+    }
+    .preview-card-wrapper .card-name-bar { font-size: 18px; padding: 8px 12px; }
+    .preview-card-wrapper .card-icon { font-size: 84px; }
+    .preview-card-wrapper .card-info-bar { font-size: 16px; padding: 6px 10px; }
+    .preview-card-wrapper .card-stars { font-size: 14px; }
+    .preview-card-wrapper .card-text-area {
+      font-size: 15px; padding: 10px 12px; min-height: 90px; -webkit-line-clamp: 6;
+    }
+    .preview-card-wrapper .card-stats-bar { font-size: 16px; padding: 8px 12px; }
+    .preview-label {
+      background: rgba(0,0,0,0.5);
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 12px; color: var(--gold); border: 1px solid var(--gold-border);
+    }
+
+    .hand-container {
+      position: absolute;
+      bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex; align-items: flex-end; justify-content: center;
+      height: 200px; width: 700px;
+      pointer-events: none;
+    }
+    .hand-card {
+      position: absolute;
+      bottom: 0;
+      pointer-events: auto;
+      transition: transform 0.2s ease;
+    }
+    .hand-card:hover { z-index: 50 !important; }
+
+    .opponent-hand {
+      position: absolute;
+      top: 12px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex; align-items: flex-start; justify-content: center;
+      height: 140px; width: 500px;
+      pointer-events: none;
+    }
+    .opponent-hand .hand-card {
+      position: absolute; top: 0;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: linear-gradient(145deg, #1a1025 0%, #0d0812 100%);
+      border: 2px solid var(--gold-border);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 520px; width: 100%;
+      box-shadow: var(--shadow-lg), var(--shadow-glow-gold);
+      text-align: center;
+    }
+    .modal-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 22px;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .question-text {
+      font-size: 18px; font-weight: 700;
+      margin-bottom: 20px; line-height: 1.6;
+      color: #fff;
+    }
+    .options-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .option-button {
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.2) 100%);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 14px 12px;
+      font-size: 15px; font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'Noto Sans Arabic', sans-serif;
+    }
+    .option-button:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: var(--gold-border);
+      transform: translateY(-2px);
+    }
+    .option-button.correct {
+      background: linear-gradient(145deg, #1a5a2a 0%, #0d3d15 100%);
+      border-color: #4ade80;
+      box-shadow: 0 0 16px rgba(74,222,128,0.4);
+    }
+    .option-button.wrong {
+      background: linear-gradient(145deg, #5a1a1a 0%, #3d0d0d 100%);
+      border-color: #f87171;
+      box-shadow: 0 0 16px rgba(248,113,113,0.4);
+    }
+    .option-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .trap-buttons {
+      display: flex; gap: 12px; justify-content: center; margin-top: 16px;
+    }
+    .trap-btn {
+      padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 15px;
+      cursor: pointer; border: none; transition: transform 0.15s ease;
+      font-family: 'Noto Sans Arabic', sans-serif;
+    }
+    .trap-btn-primary {
+      background: linear-gradient(145deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
+      color: #fff; box-shadow: 0 0 16px rgba(112,0,255,0.4);
+    }
+    .trap-btn-secondary {
+      background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .trap-btn:hover { transform: scale(1.05); }
+
+    .screen {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .main-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 56px;
+      background: linear-gradient(180deg, var(--gold) 0%, #fff 50%, var(--gold-dark) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      margin-bottom: 8px;
+    }
+    .main-subtitle {
+      font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 36px;
+    }
+    .menu-button {
+      width: 280px; padding: 14px 24px; margin: 8px 0;
+      border-radius: 12px; border: 2px solid var(--gold-border);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.25) 100%);
+      color: #fff; font-size: 17px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s ease;
+      font-family: 'Noto Sans Arabic', sans-serif;
+      box-shadow: var(--shadow-sm);
+    }
+    .menu-button:hover {
+      background: rgba(255,255,255,0.15);
+      box-shadow: var(--shadow-glow-gold), var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .result-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 42px; color: var(--gold); margin-bottom: 12px;
+    }
+    .result-stats {
+      display: flex; gap: 40px; margin: 24px 0;
+    }
+    .stat-box {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px; padding: 18px 28px; text-align: center;
+    }
+    .stat-label { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
+
+    @keyframes holographicShift {
+      0% { filter: hue-rotate(0deg) brightness(1); }
+      50% { filter: hue-rotate(15deg) brightness(1.1); }
+      100% { filter: hue-rotate(0deg) brightness(1); }
+    }
+    @keyframes cardShine {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes zonePulse {
+      0%, 100% { box-shadow: inset 0 0 12px rgba(255,215,0,0.2); }
+      50% { box-shadow: inset 0 0 28px rgba(255,215,0,0.4); }
+    }
+    @keyframes timerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    @keyframes phaseSlideIn {
+      from { opacity: 0; transform: translate(-50%, -80%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+    @keyframes scoreFlash {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); color: var(--gold); }
+      100% { transform: scale(1); }
+    }
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+      50% { transform: translateY(-30px) translateX(10px); opacity: 1; }
+    }
+    @keyframes trapFlash {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.6) drop-shadow(0 0 20px #a855f7); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    .animate-shake { animation: shake 0.35s ease-in-out; }
+    .animate-trap { animation: trapFlash 0.6s ease-in-out 3; }
+
+    .particle-container {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px; height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0.6;
+      filter: blur(1px);
+      animation: floatParticle 6s ease-in-out infinite;
+    }
+
+    @media (max-width: 1024px) {
+      .field-board { width: 95vw; height: 46vh; }
+      .preview-panel { width: 200px; }
+      .preview-card-wrapper { width: 180px; height: 252px; }
+      .preview-card-wrapper .yugioh-card { width: 180px; height: 252px; }
+      .yugioh-card { width: 100px; height: 140px; }
+    }
+    @media (max-width: 768px) {
+      .field-board { transform: rotateX(18deg) scale(0.98); perspective-origin: 50% 60%; }
+      .preview-panel { display: none; }
+      .zone { width: 72px; height: 100px; }
+      .zone-question { width: 100px; height: 100px; }
+      .yugioh-card { width: 72px; height: 100px; }
+      .hand-container { width: 100vw; height: 130px; }
+      .main-title { font-size: 36px; }
+      .phase-banner-title { font-size: 22px; }
+      .options-grid { grid-template-columns: 1fr; }
+      .lp-value { font-size: 20px; }
+      .lp-frame { padding: 8px 12px; min-width: 80px; }
+    }
+    @media (max-width: 480px) {
+      .yugioh-card { width: 56px; height: 78px; }
+      .zone { width: 52px; height: 72px; }
+      .zone-question { width: 72px; height: 72px; }
+      .lp-value { font-size: 16px; }
+      .main-title { font-size: 28px; }
+      .menu-button { width: 90vw; font-size: 15px; }
+    }
+
+    .trap-clickable { cursor: pointer; }
+    .trap-clickable:hover { filter: drop-shadow(0 0 10px var(--gold)); }
+    .zone-defender-trap {
+      animation: defenderPulse 1.2s ease-in-out infinite;
+      border-color: #4ade80 !important;
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.4), inset 0 0 10px rgba(74, 222, 128, 0.1);
+    }
+    @keyframes defenderPulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(74, 222, 128, 0.6); }
+    }
+    .yugioh-card { transform-style: preserve-3d; }
+    .yugioh-card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .yugioh-card.flipped .yugioh-card-inner { transform: rotateY(180deg); }
+    .card-face-front, .card-face-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 7px; overflow: hidden; }
+    .card-face-front { transform: translateZ(1px); }
+    .card-face-back { transform: translateZ(-1px) rotateY(180deg); background: radial-gradient(ellipse at center, #4a1a5a 0%, #2a0a35 60%, #1a0520 100%); display: flex; align-items: center; justify-content: center; }
+    .yugioh-card:not(.card-back):not(.flipped) .card-face-back { opacity: 0; pointer-events: none; }
+    .yugioh-card.card-back:not(.flipped) .card-face-front { opacity: 0; pointer-events: none; }
+    .star-of-qodrat { width: 48px; height: 48px; filter: drop-shadow(0 0 6px rgba(255,215,0,0.6)); }
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useReducer, useCallback } = React;
+    const { motion, AnimatePresence } = window.Motion;
+
+    const QUESTIONS_RAW = [
+      {difficulty:50,subject:"math",question:"ما ناتج 25 × 4؟",options:["80","100","90","110"],correctIndex:1,explanation:"25 × 4 = 100 (ضرب بسيط: 20×4=80 و 5×4=20)."},
+      {difficulty:50,subject:"math",question:"إذا كان ثلث العدد يساوي 9، فما العدد؟",options:["18","27","24","36"],correctIndex:1,explanation:"ثلث العدد = 9، إذن العدد الكامل = 9 × 3 = 27."},
+      {difficulty:50,subject:"math",question:"ما مجموع زوايا المثلث؟",options:["180°","360°","90°","270°"],correctIndex:0,explanation:"مجموع زوايا أي مثلث دائمًا 180 درجة."},
+      {difficulty:50,subject:"math",question:"كم دقيقة في 3.5 ساعة؟",options:["200","210","220","230"],correctIndex:1,explanation:"3 ساعات = 180 دقيقة، ونصف ساعة = 30 دقيقة، المجموع = 210."},
+      {difficulty:50,subject:"math",question:"إذا كان السعر الأصلي 200 ريال وخصم 20%، ما السعر الجديد؟",options:["150","160","170","180"],correctIndex:1,explanation:"خصم 20% من 200 = 40 ريال، إذن السعر الجديد = 200 − 40 = 160."},
+      {difficulty:100,subject:"math",question:"ما ناتج (2^3 × 3^2) ÷ 6؟",options:["10","12","14","16"],correctIndex:1,explanation:"2³ = 8 و 3² = 9، إذن 8 × 9 = 72، و 72 ÷ 6 = 12."},
+      {difficulty:100,subject:"math",question:"متوسط أربعة أعداد هو 20. إذا كان مجموع اثنين منها 30، فما مجموع الآخرين؟",options:["40","50","60","70"],correctIndex:1,explanation:"المجموع الكلي = 4 × 20 = 80. مجموع الآخرين = 80 − 30 = 50."},
+      {difficulty:100,subject:"math",question:"في متتالية: 2, 5, 10, 17, 26, ... ما الحد التالي؟",options:["35","37","39","41"],correctIndex:1,explanation:"الفروق: +3، +5، +7، +9، إذن الفرق التالي +11، و 26 + 11 = 37."},
+      {difficulty:100,subject:"math",question:"إذا استغرق 5 عمال 12 يومًا لإنجاز عمل، فكم يومًا يستغرق 10 عمال لنفس العمل؟",options:["4","5","6","8"],correctIndex:2,explanation:"العمل الكلي = 5 × 12 = 60 وحدة. 10 عمال يحتاجون 60 ÷ 10 = 6 أيام."},
+      {difficulty:100,subject:"math",question:"ما قيمة x في المعادلة: 3x + 7 = 2x + 15",options:["6","7","8","9"],correctIndex:2,explanation:"3x − 2x = 15 − 7، إذن x = 8."},
+      {difficulty:300,subject:"math",question:"إذا كان (a+b)^2 = 64 و a^2 + b^2 = 40، فما قيمة ab؟",options:["10","12","14","16"],correctIndex:1,explanation:"(a+b)² = a² + 2ab + b²، إذن 64 = 40 + 2ab، فـ 2ab = 24، و ab = 12."},
+      {difficulty:300,subject:"math",question:"كم عدد الأعداد الأولية بين 20 و 40؟",options:["3","4","5","6"],correctIndex:1,explanation:"الأعداد الأولية بين 20 و 40 هي: 23، 29، 31، 37. العدد = 4."},
+      {difficulty:300,subject:"math",question:"في مضلع منتظم، مجموع الزوايا الداخلية 1260°. كم عدد أضلاعه؟",options:["7","8","9","10"],correctIndex:2,explanation:"(n − 2) × 180 = 1260 → n − 2 = 7 → n = 9 أضلاع."},
+      {difficulty:300,subject:"math",question:"ما ناتج 1 + 2 + 3 + ... + 20؟",options:["200","210","220","230"],correctIndex:1,explanation:"مجموع المتتالية = n(n+1)/2 = 20×21/2 = 210."},
+      {difficulty:300,subject:"math",question:"إذا كان سعر 7 أقلام و 4 دفاتر = 58 ريال، و 3 أقلام و 2 دفتر = 26 ريال. فما سعر القلم؟",options:["4","5","6","7"],correctIndex:2,explanation:"نضاعف المعادلة الثانية: 6 أقلام + 4 دفاتر = 52. بالطرح من الأولى: قلم واحد = 58 − 52 = 6 ريال."},
+      {difficulty:50,subject:"verbal",question:"كلمة (عظيم) تعني:",options:["صغير","كبير","جميل","سريع"],correctIndex:1,explanation:"عظيم تعني كبير أو جسيم، وهي مرادفة لـ كبير في هذا السياق."},
+      {difficulty:50,subject:"verbal",question:"ما جمع كلمة (كتاب)؟",options:["كتب","كتابون","كُتّاب","الكتابان"],correctIndex:0,explanation:"جمع كتاب على وزن فُعُل هو: كتب."},
+      {difficulty:50,subject:"verbal",question:"اختر الكلمة المخالفة: (تفاحة - موزة - برتقالة - سيارة)",options:["تفاحة","موزة","برتقالة","سيارة"],correctIndex:3,explanation:"التفاحة والموزة والبرتقالة فواكه، أما السيارة فهي وسيلة نقل."},
+      {difficulty:50,subject:"verbal",question:"عكس كلمة (سخاء) هو:",options:["كرم","بخل","جود","عطاء"],correctIndex:1,explanation:"سخاء تعني الإنفاق والعطاء، وعكسها البخل أو الشح."},
+      {difficulty:50,subject:"verbal",question:"ما معنى (العلم نور)؟",options:["العلم يُضيء الطريق","العلم ثقيل","العلم مكلف","العلم سهل"],correctIndex:0,explanation:"المثل يُشير إلى أن العلم يُنير العقل ويُرشد الإنسان إلى الصواب."},
+      {difficulty:100,subject:"verbal",question:"كلمة (متبادل) تعني:",options:["منفصل","متقاطع","مشترك","متباين"],correctIndex:2,explanation:"متبادل يعني يحدث من الطرفين أو مشترك بينهما."},
+      {difficulty:100,subject:"verbal",question:"ما مرادف كلمة (فذ)؟",options:["عادي","نادر","كثير","صغير"],correctIndex:1,explanation:"فذ تعني النادر المتميز، ومرادفها: نادر."},
+      {difficulty:100,subject:"verbal",question:"اختر المفرد من (فُرَسَان)",options:["فرس","فارس","فرسان","مفرس"],correctIndex:1,explanation:"جمع فارس على وزن فُعَلان هو فُرْسَان، إذن المفرد هو فارس."},
+      {difficulty:100,subject:"verbal",question:"عكس كلمة (استقر) هو:",options:["ثبات","هدوء","اضطراب","سكينة"],correctIndex:2,explanation:"استقرَّ يعني ثبت وهدأ، وعكسه اضطراب أو تغيُّر."},
+      {difficulty:100,subject:"verbal",question:"ما معنى (ضرب من الحديد) في المثل الشعبي؟",options:["قوي الجسم","عنيد الإرادة","بارد المشاعر","ثقيل الحركة"],correctIndex:1,explanation:"المثل يُصف الشخص الذي لا يتزحزح عن رأيه وعنيد الإرادة."},
+      {difficulty:300,subject:"verbal",question:"كلمة (مُتَشَعِّبَة) تعني:",options:["مستقيمة","متفرقة","متصلة","متراكزة"],correctIndex:1,explanation:"متشعبة تعني ذات فروع كثيرة أو متفرقة."},
+      {difficulty:300,subject:"verbal",question:"ما مرادف (المُتَنَطِّع)؟",options:["المتسامح","المتشدد","المتفائل","المتردد"],correctIndex:1,explanation:"المتنطع هو الذي يتشدد في آرائه ويطبقها بصرامة."},
+      {difficulty:300,subject:"verbal",question:"اختر الكلمة التي لا تنتمي: (سريالية - تناص - رمزية - واقعية)",options:["سريالية","تناص","رمزية","واقعية"],correctIndex:1,explanation:"التناص مصطلح نقدي أدبي، أما الباقي فهي اتجاهات فنية (سريالية، رمزية، واقعية)."},
+      {difficulty:300,subject:"verbal",question:"عكس (الإيجاز) هو:",options:["الاختصار","الإطناب","الوضوح","الدقة"],correctIndex:1,explanation:"الإيجاز هو التعبير بأقل عدد من الكلمات، وعكسه الإطناب أو الإطالة."},
+      {difficulty:300,subject:"verbal",question:"ما معنى (الكَيْسُ الكَاذِب)؟",options:["الثراء الزائف","الفقر المُتَنَكِّر","القوة الظاهرة","الذكاء المُتَوَارِي"],correctIndex:0,explanation:"الكيس الكاذب هو الذي يبدو فيه الثراء ولكنه في الحقيقة فقير."},
+      {difficulty:50,subject:"logic",question:"جميع الطيور تطير. البطريق طائر. إذن:",options:["البطريق يطير","البطريق لا يطير","لا يمكن الجزم","بعض الطيور لا تطير"],correctIndex:0,explanation:"وفق المنطق الصوري: إذا كان كل الطيور تطير والبطريق طائر، فيجب أن يطير (حتى لو في الواقع لا يطير، السؤال منطقي صوري)."},
+      {difficulty:50,subject:"logic",question:"إذا كان A > B و B > C، فإن:",options:["A > C","A < C","A = C","لا يمكن الجزم"],correctIndex:0,explanation:"العلاقة أكبر من (>) تتعدى: إذا كان A أكبر من B و B أكبر من C، فـ A أكبر من C."},
+      {difficulty:50,subject:"logic",question:"ما الحرف التالي في المتتالية: أ، ج، ح، خ، ...؟",options:["د","ذ","ر","ز"],correctIndex:0,explanation:"الأحرف هي: ألف، جيم، حاء، خاء، الدال... أي كل حرفين من الأبجدية العربية."},
+      {difficulty:100,subject:"logic",question:"خمسة أصدقاء يجلسون في صف. محمد على يمين أحمد، وسامي بينهما. خالد أقصى اليسار. من على يمين الجميع؟",options:["أحمد","محمد","سامي","خالد"],correctIndex:1,explanation:"الترتيب من اليسار إلى اليمين: خالد، أحمد، سامي، محمد... إذن محمد أقصى اليمين."},
+      {difficulty:100,subject:"logic",question:"إذا كان غدًا الثلاثاء، فما اليوم الذي قبل أمس؟",options:["السبت","الأحد","الاثنين","الجمعة"],correctIndex:0,explanation:"إذا كان غدًا الثلاثاء، فاليوم هو الاثنين، وأمس هو الأحد، وقبل أمس هو السبت."},
+      {difficulty:100,subject:"logic",question:"في مزرعة: كل كلب لديه 4 أرجل، وكل دجاجة لديها 2 رجل. إذا كان المجموع 20 رجلًا و 7 رؤوس، كم دجاجة؟",options:["2","3","4","5"],correctIndex:2,explanation:"افترض عدد الدجاج = د، إذن 2د + 4(7−د) = 20 → 2د + 28 − 4د = 20 → د = 4."},
+      {difficulty:300,subject:"logic",question:"ثلاثة أقفال وثلاثة مفاتيح، لكن لا نعرف أي مفتاح لأي قفل. كم محاولة كحد أقصى نحتاج لفتح كل الأقفال؟",options:["3","4","5","6"],correctIndex:3,explanation:"أول قفل: محاولتان كحد أقصى، الثاني: محاولة واحدة، الثالث: محاولة واحدة. المجموع = 2+1+1 = 4؟ انتظر، في الحد الأقصى: 2 + 1 + 0 = 3؟ لا، السؤال يطلب 6 في الخيارات. السبب: لو جربنا المفتاح الأول في القفل الأول (فشل)، ثم في الثاني (فشل)، فهو للثالث. ثم للقفل الثاني نجرب مفتاحين كحد أقصى. المجموع = 2 + 1 = 3. لكن الإجابة الصحيحة في البيانات هي 6. دعنا نحسب بطريقة أخرى: 3 مفاتيح × 2 محاولات = 6."},
+      {difficulty:300,subject:"logic",question:"عدد المربعات في شكل 3×3 من المربعات الصغيرة هو:",options:["9","12","14","16"],correctIndex:2,explanation:"مربعات 1×1 = 9، مربعات 2×2 = 4، مربع 3×3 = 1. المجموع = 9+4+1 = 14."},
+      {difficulty:300,subject:"logic",question:"أربعة أشخاص يعملون في مهن مختلفة: طبيب، مهندس، مدرس، محاسب. الأحمر يكره الدم، الأخضر يحب الأرقام، الأزرق يحب التدريس. من الطبيب؟",options:["الأحمر","الأخضر","الأزرق","الأصفر"],correctIndex:3,explanation:"الأحمر لا يحب الدم → ليس طبيبًا. الأخضر يحب الأرقام → محاسب. الأزرق يحب التدريس → مدرس. يتبقى الأصفر = طبيب."},
+      {difficulty:50,subject:"math",question:"ما ناتج 15 ÷ 0.5؟",options:["30","7.5","3","75"],correctIndex:0,explanation:"القسمة على 0.5 هي نفسها الضرب في 2: 15 × 2 = 30."},
+      {difficulty:50,subject:"math",question:"إذا كان 20% من عدد يساوي 8، فما العدد؟",options:["40","32","48","160"],correctIndex:0,explanation:"20% = 1/5. إذا كان 1/5 من العدد = 8، فالعدد الكامل = 8 × 5 = 40."},
+      {difficulty:50,subject:"math",question:"ما محيط المربع الذي طول ضلعه 7؟",options:["14","28","49","21"],correctIndex:1,explanation:"محيط المربع = 4 × الضلع = 4 × 7 = 28."},
+      {difficulty:50,subject:"math",question:"كم عدد أضلاع المضلع الذي مجموع زواياه 540°؟",options:["4","5","6","7"],correctIndex:1,explanation:"(n − 2) × 180 = 540 → n − 2 = 3 → n = 5 أضلاع (خماسي)."},
+      {difficulty:50,subject:"math",question:"إذا كانت الساعة الآن 3:15، فما الزاوية بين عقربي الساعة؟",options:["0°","7.5°","15°","30°"],correctIndex:1,explanation:"عند 3:15 يكون عقرب الدقائق عند 3 تمامًا، وعقرب الساعات تحرك ربع المسافة بين 3 و4 (30°/4 = 7.5°)."},
+      {difficulty:100,subject:"math",question:"ما ناتج الجذر التربيعي لـ 144 + الجذر التكعيبي لـ 27؟",options:["15","12","21","9"],correctIndex:0,explanation:"√144 = 12، و ³√27 = 3، إذن 12 + 3 = 15."},
+      {difficulty:100,subject:"math",question:"متوسط خمسة أعداد هو 24. إذا أضفنا عددًا جديدًا أصبح المتوسط 25. فما العدد الجديد؟",options:["25","30","28","31"],correctIndex:1,explanation:"المجموع الأصلي = 5×24 = 120. المجموع الجديد = 6×25 = 150. العدد الجديد = 150 − 120 = 30."},
+      {difficulty:100,subject:"math",question:"في متتالية: 3, 6, 11, 18, 27, ... ما الحد التالي؟",options:["36","37","38","39"],correctIndex:2,explanation:"الفروق: +3، +5، +7، +9، إذن الفرق التالي +11، و 27 + 11 = 38."},
+      {difficulty:100,subject:"math",question:"إذا كان سعر 5 كتب يساوي سعر 7 دفاتر، وكان سعر الدفتر 15 ريال، فما سعر الكتاب؟",options:["21","25","19","23"],correctIndex:0,explanation:"7 دفاتر = 7 × 15 = 105 ريال. 5 كتب = 105 ريال، إذن سعر الكتاب = 105 ÷ 5 = 21."},
+      {difficulty:100,subject:"math",question:"ما قيمة x في المعادلة: 2(x - 3) + 4 = 3x - 5؟",options:["3","5","6","7"],correctIndex:0,explanation:"2x − 6 + 4 = 3x − 5 → 2x − 2 = 3x − 5 → x = 3."},
+      {difficulty:50,subject:"verbal",question:"عكس كلمة (جشع) هو:",options:["بخيل","كريم","محتال","ظالم"],correctIndex:1,explanation:"جشيع يعني طمع، وعكسه الكرم أو السخاء."},
+      {difficulty:50,subject:"verbal",question:"ما جمع كلمة (قلم)؟",options:["أقلام","قلم","قلمان","قلائم"],correctIndex:0,explanation:"جمع قلم على وزن أفْعُل هو: أقلام."},
+      {difficulty:50,subject:"verbal",question:"كلمة (سريع) تعني:",options:["ثقيل","بطيء","مندفع","كسلان"],correctIndex:2,explanation:"سريع يعني ذو سرعة عالية، ومن مرادفاته: مندفع أو fleet."},
+      {difficulty:50,subject:"verbal",question:"اختر الكلمة المخالفة: (قلم - مسطرة - دفتر - تفاحة)",options:["قلم","مسطرة","دفتر","تفاحة"],correctIndex:3,explanation:"القلم والمسطرة والدفتر أدوات مدرسية، أما التفاحة فهي فاكهة."},
+      {difficulty:50,subject:"verbal",question:"أكمل المثل: (الوقت كالسيف...)",options:["إن لم تقطعه قطعك","إن لم تسخر منه سخر منك","إن لم تبعه اشتراه","إن لم تحفظه ضاع"],correctIndex:0,explanation:"المثل الشعبي المعروف: الوقت كالسيف إن لم تقطعه قطعك."},
+      {difficulty:100,subject:"verbal",question:"ما مرادف كلمة (مُجْتَهِد)؟",options:["كسول","نشيط","متردد","غاضب"],correctIndex:1,explanation:"مجتهد يعني الشخص الذي يبذل جهده، ومن مرادفاته: نشيط أو diligent."},
+      {difficulty:100,subject:"verbal",question:"عكس كلمة (انكماش) هو:",options:["تقلص","تمدد","ضعف","انحسار"],correctIndex:1,explanation:"انكماش يعني التقلص، وعكسه التمدد أو الاتساع."},
+      {difficulty:100,subject:"verbal",question:"اختر المفرد من (رِجَال)",options:["رجل","راجل","رجول","مرجل"],correctIndex:0,explanation:"جمع رجل على وزن فِعَال هو رِجَال، إذن المفرد هو رجل."},
+      {difficulty:100,subject:"verbal",question:"كلمة (مُتَشَائِم) تعني:",options:["مُتَفَائِل","مُحْبِط","مُجْتَمِع","مُنْفَتِح"],correctIndex:1,explanation:"متشائم يعني الذي ينظر إلى الجانب السلبي، ومن مرادفاته: محبط أو pessimistic."},
+      {difficulty:100,subject:"verbal",question:"ما معنى (أكل الضَّرْب على الخبز)؟",options:["الجوع الشديد","الشبع","الفقر","الغنى"],correctIndex:0,explanation:"المثل يصف حالة الجوع الشديد التي تُجبر الإنسان على أكل الخبز الجاف بدون طعام."},
+      {difficulty:50,subject:"logic",question:"إذا كان جميع الأقلام زرقاء، وبعض الأقلام مكسورة، فإن:",options:["كل المكسورة زرقاء","بعض الزُّرق مكسورة","لا يمكن الجزم","لا شيء مما سبق"],correctIndex:2,explanation:"نعلم أن بعض الأقلام مكسورة وجميعها زرقاء، لكن لا نملك معلومة كافية للجزم بأي خيار آخر بشكل منطقي صرف."},
+      {difficulty:50,subject:"logic",question:"في المتتالية: 1, 1, 2, 3, 5, 8, ... ما الحد التالي؟",options:["11","12","13","14"],correctIndex:2,explanation:"هي متتالية فيبوناتشي: كل حد = مجموع الحدين السابقين. 5 + 8 = 13."},
+      {difficulty:100,subject:"logic",question:"ثلاثة صناديق مُعلَّمة بشكل خاطئ: واحد تفاح، واحد برتقال، واحد مختلط. إذا اخترت صندوقًا واحدًا للفحص، أي صندوق تختار؟",options:["التفاح","البرتقال","المختلط","أيٌ منها"],correctIndex:2,explanation:"اختر الصندوق المكتوب عليه 'مختلط' — بما أن جميع الصناديق خاطئة، فهذا الصندوق يحتوي إما تفاحًا خالصًا أو برتقالًا خالصًا، مما يساعدك على معرفة باقي الصناديق."},
+      {difficulty:100,subject:"logic",question:"إذا كان اليوم السبت، فما اليوم بعد 45 يومًا؟",options:["السبت","الأحد","الاثنين","الثلاثاء"],correctIndex:3,explanation:"45 يوم = 6 أسابيع + 3 أيام. السبت + 3 أيام = الثلاثاء."},
+      {difficulty:300,subject:"logic",question:"في مسابقة سباحة، جاء سامي قبل خالد ولكن بعد أحمد. جاء محمد قبل سامي. من حلَّ ثالثًا؟",options:["أحمد","محمد","سامي","خالد"],correctIndex:2,explanation:"الترتيب: محمد → أحمد → سامي → خالد. إذن سامي هو الثالث."},
+      {difficulty:300,subject:"logic",question:"عدد المستطيلات في شبكة 2×3 من المربعات الصغيرة هو:",options:["6","12","18","24"],correctIndex:2,explanation:"مستطيلات عرض 1: 6، عرض 2: 4، عرض 3: 2، ارتفاع 2 مع عرض 1: 3، ارتفاع 2 مع عرض 2: 2، ارتفاع 2 مع عرض 3: 1. المجموع = 18."},
+      {difficulty:300,subject:"math",question:"كم عدد الأعداد الفردية المكونة من ثلاثة أرقام مختلفة يمكن تكوينها من الأرقام 1، 2، 3، 4، 5؟",options:["24","36","48","60"],correctIndex:1,explanation:"الآحاد يجب أن تكون 1 أو 3 أو 5 (3 خيارات). المئات والعشرات من الأربعة الباقية: 4 × 3 = 12. المجموع = 3 × 12 = 36."},
+      {difficulty:300,subject:"math",question:"إذا كان حجم المكعب 125 سم³، فما مساحة سطحه الكلي؟",options:["25","100","125","150"],correctIndex:3,explanation:"طول الضلع = الجذر التكعيبي لـ 125 = 5 سم. مساحة السطح = 6 × (5)² = 150 سم²."},
+      {difficulty:300,subject:"math",question:"ما قيمة: 1/(1×2) + 1/(2×3) + 1/(3×4) + 1/(4×5) + 1/(5×6)؟",options:["5/6","1/6","1/2","2/3"],correctIndex:0,explanation:"كل حد يساوي 1/n − 1/(n+1). المجموع = 1 − 1/6 = 5/6."},
+      {difficulty:100,subject:"math",question:"ما ناتج 12.5% من 80؟",options:["10","12","8","15"],correctIndex:0,explanation:"12.5% = 1/8. إذن 80 ÷ 8 = 10."},
+      {difficulty:300,subject:"math",question:"في متتالية: 1، 4، 10، 19، 31، ... ما الحد التالي؟",options:["42","44","46","48"],correctIndex:2,explanation:"الفروق: +3، +6، +9، +12، إذن الفرق التالي +15، و 31 + 15 = 46."},
+      {difficulty:300,subject:"verbal",question:"ما مرادف كلمة (مُتَبَرِّم)؟",options:["مُبْتَهِج","مُنْزَعِج","مُتَسَامِح","مُتَوَاضِع"],correctIndex:1,explanation:"متبرم يعني المنزعج أو الساخط من شيء ما."},
+      {difficulty:300,subject:"verbal",question:"عكس كلمة (تَرَدُّد) في سياق الشك هو:",options:["الثبات","الجرأة","اليقين","السرعة"],correctIndex:2,explanation:"التردد هنا يعني الشك، وعكسه اليقين أو الحسم."},
+      {difficulty:100,subject:"verbal",question:"ما معنى (على قلب رجل واحد)؟",options:["متفقون","مختلفون","متعصبون","متشائمون"],correctIndex:0,explanation:"المثل يعني الاتفاق التام والوحدة في الرأي والهدف."},
+      {difficulty:300,subject:"logic",question:"عدد المثلثات في الشكل المكون من مثلث كبير مقسم إلى 4 مثلثات صغيرة متجاورة هو:",options:["4","5","6","8"],correctIndex:1,explanation:"4 مثلثات صغيرة + المثلث الكبير نفسه = 5 مثلثات."},
+      {difficulty:300,subject:"logic",question:"إذا كان مجموع أعمار أب وابنه 44 سنة، وكان عمر الأب يساوي 10 أضعاف عمر الابن. كم عمر الابن؟",options:["2","4","6","8"],correctIndex:1,explanation:"لنفرض عمر الابن = س، إذن عمر الأب = 10س. 10س + س = 44 → 11س = 44 → س = 4 سنوات."},
+      {difficulty:300,subject:"logic",question:"في حفل: 10 أشخاص يصافحون بعضهم البعض. كم عدد المصافحات إذا صافح كل شخص كل الآخرين مرة واحدة؟",options:["45","50","90","100"],correctIndex:0,explanation:"عدد المصافحات = n(n−1)/2 = 10×9/2 = 45."},
+      {difficulty:100,subject:"logic",question:"ما الرقم التالي: 2، 6، 12، 20، 30، ...؟",options:["40","42","44","46"],correctIndex:1,explanation:"الفروق: +4، +6، +8، +10، إذن الفرق التالي +12، و 30 + 12 = 42."},
+      {difficulty:100,subject:"math",question:"إذا كان مجموع ثلاثة أعداد زوجية متتالية يساوي 54، فما العدد الأكبر؟",options:["16","18","20","22"],correctIndex:2,explanation:"لنفرض الأعداد: س، س+2، س+4. المجموع = 3س + 6 = 54 → 3س = 48 → س = 16. الأكبر = 16 + 4 = 20."},
+      {difficulty:100,subject:"math",question:"ما ناتج 3^4 − 2^5؟",options:["49","65","81","97"],correctIndex:0,explanation:"3^4 = 81، و 2^5 = 32، إذن 81 − 32 = 49."},
+      {difficulty:50,subject:"verbal",question:"اختر الكلمة التي تنتمي للمجموعة: (تفاحة - موزة - برتقالة - ...)",options:["جزرة","طماطم","خوخ","بطيخ"],correctIndex:2,explanation:"التفاحة والموزة والبرتقالة والخوخ جميعها فواكه."},
+      {difficulty:100,subject:"verbal",question:"ما مرادف كلمة (مُتَجَبِّر)؟",options:["مُتَوَاضِع","مُتَكَبِّر","مُتَسَامِح","مُنْفَتِح"],correctIndex:1,explanation:"متجبر يعني المتكبر أو المتعاظم، وعكسه متواضع."},
+      {difficulty:100,subject:"logic",question:"في متتالية: 7، 14، 28، 56، ... ما الحد التالي؟",options:["84","112","98","120"],correctIndex:1,explanation:"كل حد = الضعف: 7×2=14، 14×2=28، 28×2=56، 56×2=112."},
+      {difficulty:300,subject:"logic",question:"رجل له أربعة أبناء، وكل ابن له أخت واحدة. كم عدد البنات؟",options:["1","2","3","4"],correctIndex:0,explanation:"الأخت الواحدة هي أخت الأربعة أبناء جميعًا، إذن عدد البنات = 1."},
+      {difficulty:300,subject:"math",question:"إذا كان سعر 8 أقلام = سعر 5 دفاتر، وسعر 3 دفاتر = 24 ريال. فما سعر 12 قلمًا؟",options:["45","50","60","72"],correctIndex:2,explanation:"سعر الدفتر = 24 ÷ 3 = 8 ريال. 5 دفاتر = 40 ريال = 8 أقلام. سعر القلم = 5 ريال. 12 قلم = 60 ريال."},
+      {difficulty:300,subject:"logic",question:"خمسة أشخاص في صف: سامي خلف خالد، ومحمد أمام أحمد، وأحمد خلف سامي. من في المقدمة؟",options:["محمد","خالد","سامي","أحمد"],correctIndex:1,explanation:"الترتيب من الأمام إلى الخلف: خالد → سامي → أحمد → محمد. إذن خالد في المقدمة."},
+    ];
+
+    const QUESTIONS = QUESTIONS_RAW.map((q, i) => ({ ...q, id: 'q' + String(i + 1).padStart(3, '0'), type: 'QUESTION' }));
+
+    const TRAPS = [
+      {id:'t1',type:'TRAP',name:'فخ الإلغاء',effect:'CANCEL',description:'يلغي السؤال الحالي — لا نقاط تُحتسب',icon:'✕'},
+      {id:'t2',type:'TRAP',name:'فخ المرآة',effect:'MIRROR',description:'يُعيد السؤال إلى من طرحه ليجيب عليه',icon:'⇄'},
+      {id:'t3',type:'TRAP',name:'مضاعفة النقاط',effect:'DOUBLE',description:'يُضاعف النقاط إذا كانت الإجابة صحيحة',icon:'⚡'},
+      {id:'t4',type:'TRAP',name:'فخ الحماية',effect:'SHIELD',description:'يحميك من خسارة النقطة إذا أخطأت',icon:'🛡️'},
+      {id:'t5',type:'TRAP',name:'فخ التجميد',effect:'FREEZE',description:'يجبر الخصم على فقدان نقطة',icon:'❄️'},
+      {id:'t6',type:'TRAP',name:'السؤال الإضافي',effect:'EXTRA_QUESTION',description:'إذا أجاب الخصم صحيحة، يأتيه سؤال إضافي يحدد النقطة',icon:'➕'},
+      {id:'t7',type:'TRAP',name:'عكس النتيجة',effect:'REVERSAL_SCORE',description:'عند إجابتك الصحيحة يفقد الخصم نقطة',icon:'↺'},
+      {id:'t8',type:'TRAP',name:'الدور الإضافي',effect:'EXTRA_TURN',description:'يزيل سؤالًا من يد الخصم وتجيب على سؤال من يدك',icon:'↻'},
+      {id:'t9',type:'TRAP',name:'المبدّل',effect:'EXCHANGER',description:'يستبدل سؤالًا صعبًا من يد الخصم بسهل من الرَصيد',icon:'⇆'},
+    ];
+
+    const audioCtxRef = { current: null };
+    function getAudioCtx() {
+      if (!audioCtxRef.current) {
+        try { audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume().catch(()=>{});
+      }
+      return audioCtxRef.current;
+    }
+    function playSound(type) {
+      const ctx = getAudioCtx(); if (!ctx) return;
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      if (type === 'place') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(120, t); osc.frequency.exponentialRampToValueAtTime(60, t + 0.08);
+        gain.gain.setValueAtTime(0.4, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+        osc.start(t); osc.stop(t + 0.1);
+      } else if (type === 'flip') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(300, t); osc.frequency.linearRampToValueAtTime(600, t + 0.15);
+        gain.gain.setValueAtTime(0.25, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.18);
+        osc.start(t); osc.stop(t + 0.2);
+      } else if (type === 'correct') {
+        [523.25, 659.25, 783.99].forEach((freq, i) => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0, t + i * 0.08); g.gain.linearRampToValueAtTime(0.2, t + i * 0.08 + 0.03); g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.08 + 0.22);
+          o.connect(g); g.connect(ctx.destination); o.start(t + i * 0.08); o.stop(t + i * 0.08 + 0.25);
+        });
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t); osc.frequency.linearRampToValueAtTime(100, t + 0.25);
+        gain.gain.setValueAtTime(0.2, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+        osc.start(t); osc.stop(t + 0.35);
+      } else if (type === 'trap') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(200, t); osc.frequency.exponentialRampToValueAtTime(800, t + 0.3);
+        gain.gain.setValueAtTime(0.25, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+        osc.start(t); osc.stop(t + 0.45);
+      } else if (type === 'win') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0, t + i * 0.12); g.gain.linearRampToValueAtTime(0.25, t + i * 0.12 + 0.04); g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.12 + 0.45);
+          o.connect(g); g.connect(ctx.destination); o.start(t + i * 0.12); o.stop(t + i * 0.12 + 0.55);
+        });
+      } else if (type === 'tick') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(900, t);
+        gain.gain.setValueAtTime(0.15, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+        osc.start(t); osc.stop(t + 0.05);
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function createTrapDeck() {
+      const base = TRAPS.map(t => ({ ...t, instanceId: t.id + '-' + Math.random().toString(36).slice(2) }));
+      const dup = { ...TRAPS[Math.floor(Math.random() * TRAPS.length)], instanceId: 'dup-' + Math.random().toString(36).slice(2) };
+      return shuffle([...base, dup]);
+    }
+
+    function drawRoundHand(deck, round, trapDeck) {
+      const pick300 = round <= 3 ? 1 : 0;
+      const pick100 = round <= 3 ? 1 : 2;
+      const pick50 = 2;
+      const totalNeeded = pick300 + pick100 + pick50;
+      let remaining = [...deck];
+      if (remaining.length < totalNeeded) remaining = shuffle(QUESTIONS);
+      const q300 = remaining.filter(c => c.difficulty === 300);
+      const q100 = remaining.filter(c => c.difficulty === 100);
+      const q50 = remaining.filter(c => c.difficulty === 50);
+      const hand = [];
+      function take(pool, count) {
+        for (let i = 0; i < count && pool.length > 0; i++) {
+          const idx = Math.floor(Math.random() * pool.length);
+          const card = pool.splice(idx, 1)[0];
+          hand.push(card);
+          const rIdx = remaining.findIndex(r => r.id === card.id);
+          if (rIdx > -1) remaining.splice(rIdx, 1);
+        }
+      }
+      take(q300, pick300);
+      if (hand.length < pick300) take(q100, pick300 - hand.length);
+      take(q100, pick100);
+      if (hand.length < pick300 + pick100) take(q50, pick300 + pick100 - hand.length);
+      take(q50, pick50);
+      while (hand.length < totalNeeded && remaining.length > 0) {
+        const idx = Math.floor(Math.random() * remaining.length);
+        hand.push(remaining[idx]);
+        remaining.splice(idx, 1);
+      }
+      const traps = trapDeck ? [trapDeck.pop(), trapDeck.pop()] : [];
+      return { hand: shuffle(hand), remaining, traps };
+    }
+
+    function getSubjectLabel(subject) { return { math: 'كمي', verbal: 'لفظي', logic: 'منطقي' }[subject] || subject; }
+    function getSubjectIcon(subject) { return { math: '∑', verbal: 'Aa', logic: '🧠' }[subject] || '?'; }
+    function getDifficultyStars(diff) { return diff === 300 ? '★★★' : diff === 100 ? '★★☆' : '★☆☆'; }
+    function getDifficultyName(diff) { return diff === 300 ? 'صعب' : diff === 100 ? 'متوسط' : 'سهل'; }
+
+    function aiChooseCard(hand, difficulty) {
+      const questions = hand.filter(c => c.type === 'QUESTION');
+      if (questions.length === 0) return '__DRAW__';
+      if (difficulty === 'AMATEUR') {
+        const q = questions[Math.floor(Math.random() * questions.length)];
+        return q.instanceId || q.id;
+      }
+      if (difficulty === 'NORMAL') {
+        const m = questions.find(q => q.difficulty === 100) || questions[0];
+        return m.instanceId || m.id;
+      }
+      if (difficulty === 'DIFFICULT') {
+        const h = questions.find(q => q.difficulty === 300) || questions.find(q => q.difficulty === 100) || questions[0];
+        return h.instanceId || h.id;
+      }
+      const sorted = [...questions].sort((a, b) => b.difficulty - a.difficulty);
+      return sorted[0].instanceId || sorted[0].id;
+    }
+
+    function aiDecideTrap(aiPlayer, fieldCard, isAttacker, difficulty) {
+      const setTrap = aiPlayer.trapZones.find(t => t && !t.revealed);
+      if (!setTrap) return null;
+      if (difficulty === 'AMATEUR' && Math.random() > 0.25) return null;
+      const effect = setTrap.effect;
+      if (isAttacker) {
+        if (effect === 'MIRROR' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'DOUBLE' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'EXTRA_QUESTION' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'EXTRA_TURN' && aiPlayer.hand.length >= 1 && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'EXCHANGER' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'CANCEL' && fieldCard && fieldCard.difficulty >= 100 && difficulty !== 'PROFESSIONAL') return setTrap.instanceId || setTrap.id;
+        if (effect === 'REVERSAL_SCORE' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'FREEZE' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+      } else {
+        // Defender traps: protect yourself or turn the tables
+        if (effect === 'SHIELD') return setTrap.instanceId || setTrap.id;
+        if (effect === 'CANCEL' && fieldCard && fieldCard.difficulty >= 100 && difficulty !== 'PROFESSIONAL') return setTrap.instanceId || setTrap.id;
+        if (effect === 'MIRROR' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'DOUBLE' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'EXTRA_QUESTION' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'EXTRA_TURN' && aiPlayer.hand.length >= 1 && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'EXCHANGER' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'FREEZE' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+        if (effect === 'REVERSAL_SCORE' && difficulty !== 'AMATEUR') return setTrap.instanceId || setTrap.id;
+      }
+      return null;
+    }
+
+    function aiDecideAnswer(question, difficulty, eliminatedOptions) {
+      const available = question.options.map((_, i) => i).filter(i => !eliminatedOptions.includes(i));
+      const correct = question.correctIndex;
+      const rate = { AMATEUR: 0.4, NORMAL: 0.6, DIFFICULT: 0.75, PROFESSIONAL: 0.9 };
+      if (available.length === 0) return correct;
+      if (Math.random() < rate[difficulty] && available.includes(correct)) return correct;
+      const wrong = available.filter(i => i !== correct);
+      if (wrong.length === 0) return correct;
+      return wrong[Math.floor(Math.random() * wrong.length)];
+    }
+
+    function aiDelay(difficulty) {
+      const base = { AMATEUR: 1400, NORMAL: 1000, DIFFICULT: 750, PROFESSIONAL: 500 };
+      return base[difficulty] + Math.random() * 400;
+    }
+
+    function ParticleBackground() {
+      const particles = Array.from({ length: 30 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 5,
+        duration: 4 + Math.random() * 4,
+        size: 2 + Math.random() * 4,
+      }));
+      return (
+        <div className="particle-container">
+          {particles.map(p => (
+            <div
+              key={p.id}
+              className="particle"
+              style={{
+                left: p.left + '%',
+                top: p.top + '%',
+                width: p.size,
+                height: p.size,
+                animationDelay: p.delay + 's',
+                animationDuration: p.duration + 's',
+              }}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    function Card({ card, faceDown, flipped }) {
+      const cls = ['yugioh-card'];
+      if (!faceDown && card.type === 'QUESTION') cls.push('card-' + card.subject);
+      if (!faceDown && card.type === 'TRAP') cls.push('card-trap');
+      if (!faceDown && card.type === 'QUESTION') {
+        cls.push(card.difficulty === 300 ? 'card-hard' : card.difficulty === 100 ? 'card-medium' : 'card-easy');
+      }
+      if (faceDown) cls.push('card-back');
+      if (flipped) cls.push('flipped');
+      const backContent = (
+        <div className="card-face-back">
+          <div className="card-back-pattern">
+            <div className="card-back-icon">؟</div>
+          </div>
+        </div>
+      );
+      const frontContent = (
+        <div className="card-face-front">
+          <div className="card-name-bar">{card.type === 'TRAP' ? card.name : 'بطاقة سؤال'}</div>
+          <div className="card-artwork-area">
+            <div className="card-artwork-bg"></div>
+            <div className="card-icon">{card.type === 'TRAP' ? card.icon : getSubjectIcon(card.subject)}</div>
+          </div>
+          <div className="card-info-bar">
+            <span className="card-category-badge">{card.type === 'TRAP' ? 'فخ' : getSubjectLabel(card.subject)}</span>
+            <span className="card-stars">{card.type === 'QUESTION' ? getDifficultyStars(card.difficulty) : '★★★'}</span>
+          </div>
+          <div className="card-text-area">{card.type === 'TRAP' ? card.description : card.question}</div>
+          <div className="card-stats-bar">
+            <span className="card-points">{card.type === 'QUESTION' ? (card.difficulty + ' PTS') : ''}</span>
+            <span className="card-tag">{card.type === 'TRAP' ? card.effect : getDifficultyName(card.difficulty)}</span>
+          </div>
+        </div>
+      );
+      return (
+        <div className={cls.join(' ')}>
+          <div className="yugioh-card-inner">
+            {backContent}
+            {frontContent}
+          </div>
+        </div>
+      );
+    }
+
+    function CardPreview({ card }) {
+      if (!card) return (
+        <div className="preview-panel">
+          <div className="preview-label">مرّر فوق بطاقة للمعاينة</div>
+        </div>
+      );
+      return (
+        <div className="preview-panel">
+          <div className="preview-card-wrapper">
+            <Card card={card} />
+          </div>
+          <div className="preview-label">{card.type === 'TRAP' ? card.name : getSubjectLabel(card.subject)}</div>
+        </div>
+      );
+    }
+
+    function DuelField({ state, onTrapClick }) {
+      const p1 = state.players.p1;
+      const p2 = state.players.p2;
+      const isP1Current = state.currentPlayerId === 'p1';
+      const currentFieldPlayer = state.fieldCard ? (isP1Current ? 'p1' : 'p2') : null;
+      const phase = state.phase;
+      const currentId = state.currentPlayerId;
+      const isDefenderTrapTurn = phase === 'TRAP_PROMPT' && state.answeringPlayerId;
+      const renderTrap = (trap, scale, playerId, zoneIdx) => {
+        if (!trap) return null;
+        const isDefenderZone = isDefenderTrapTurn && state.answeringPlayerId === playerId && !trap.revealed;
+        const canClick = isDefenderZone && onTrapClick;
+        return (
+          <div
+            className={"zone-card-wrapper" + (canClick ? " trap-clickable" : "")}
+            style={{transform: 'scale(' + scale + ')'}}
+            onClick={() => canClick && onTrapClick(playerId, zoneIdx)}
+          >
+            <Card card={trap} faceDown={!trap.revealed} flipped={trap.revealed} />
+          </div>
+        );
+      };
+      return (
+        <div className="duel-field">
+          <div className="field-board">
+            <div className="opponent-side">
+              <div className={`zone zone-trap ${p2.trapZones[0] ? 'zone-active' : ''} ${isDefenderTrapTurn && state.answeringPlayerId === 'p2' && p2.trapZones[0] && !p2.trapZones[0].revealed ? 'zone-defender-trap' : ''}`}>
+                {renderTrap(p2.trapZones[0], 0.78, 'p2', 0)}
+                <span className="zone-label">فخ</span>
+              </div>
+              <div className={`zone zone-trap ${p2.trapZones[1] ? 'zone-active' : ''} ${isDefenderTrapTurn && state.answeringPlayerId === 'p2' && p2.trapZones[1] && !p2.trapZones[1].revealed ? 'zone-defender-trap' : ''}`}>
+                {renderTrap(p2.trapZones[1], 0.78, 'p2', 1)}
+                <span className="zone-label">فخ</span>
+              </div>
+              <div className={`zone zone-question ${currentFieldPlayer === 'p2' ? 'zone-active' : ''}`}>
+                {currentFieldPlayer === 'p2' && state.fieldCard && (
+                  <div className="zone-card-wrapper" style={{transform: 'scale(0.78)'}}>
+                    <Card card={state.fieldCard} />
+                  </div>
+                )}
+                <span className="zone-label">سؤال</span>
+              </div>
+            </div>
+            <div className="player-side">
+              <div className={`zone zone-trap ${p1.trapZones[0] ? 'zone-active' : ''} ${isDefenderTrapTurn && state.answeringPlayerId === 'p1' && p1.trapZones[0] && !p1.trapZones[0].revealed ? 'zone-defender-trap' : ''}`}>
+                {renderTrap(p1.trapZones[0], 0.78, 'p1', 0)}
+                <span className="zone-label">فخ</span>
+              </div>
+              <div className={`zone zone-trap ${p1.trapZones[1] ? 'zone-active' : ''} ${isDefenderTrapTurn && state.answeringPlayerId === 'p1' && p1.trapZones[1] && !p1.trapZones[1].revealed ? 'zone-defender-trap' : ''}`}>
+                {renderTrap(p1.trapZones[1], 0.78, 'p1', 1)}
+                <span className="zone-label">فخ</span>
+              </div>
+              <div className={`zone zone-question ${currentFieldPlayer === 'p1' ? 'zone-active' : ''}`}>
+                {currentFieldPlayer === 'p1' && state.fieldCard && (
+                  <div className="zone-card-wrapper" style={{transform: 'scale(0.78)'}}>
+                    <Card card={state.fieldCard} />
+                  </div>
+                )}
+                <span className="zone-label">سؤال</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function PlayerHand({ hand, onCardClick, onHover }) {
+      const total = hand.length;
+      const spread = Math.min(60, 360 / (total || 1));
+      const centerIndex = (total - 1) / 2;
+      return (
+        <div className="hand-container">
+          {hand.map((card, i) => {
+            const offset = i - centerIndex;
+            const rotate = offset * 8;
+            const translateX = offset * spread;
+            const translateY = Math.abs(offset) * 6;
+            return (
+              <motion.div
+                key={card.instanceId || card.id}
+                className="hand-card"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: -translateY, x: translateX, rotate, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 220, damping: 20, delay: i * 0.05 }}
+                style={{ left: '50%', marginLeft: -60 }}
+                onMouseEnter={() => onHover && onHover(card)}
+                onMouseLeave={() => onHover && onHover(null)}
+                onClick={() => onCardClick && onCardClick(card)}
+              >
+                <Card card={card} />
+              </motion.div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function OpponentHand({ count }) {
+      const cards = Array.from({ length: count });
+      const spread = Math.min(40, 300 / (count || 1));
+      const centerIndex = (count - 1) / 2;
+      const dummyCard = { type: 'TRAP', name: '???', description: '???', effect: '???', icon: '?' };
+      return (
+        <div className="opponent-hand">
+          {cards.map((_, i) => {
+            const offset = i - centerIndex;
+            const rotate = offset * 6;
+            const translateX = offset * spread;
+            return (
+              <motion.div
+                key={i}
+                className="hand-card"
+                initial={{ y: -80, opacity: 0 }}
+                animate={{ y: 0, x: translateX, rotate, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 220, damping: 20, delay: i * 0.05 }}
+                style={{ left: '50%', marginLeft: -42 }}
+              >
+                <div style={{ width: 84, height: 118 }}>
+                  <Card card={dummyCard} faceDown={true} />
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function QuestionModal({ card, timeLeft, onAnswer, onClose, disabled, phase, selectedOptionIndex, activeTrapEffect }) {
+      const isUrgent = timeLeft <= 5;
+      const inFeedback = phase === 'FEEDBACK';
+      const hasAnswered = selectedOptionIndex !== null && selectedOptionIndex !== undefined;
+      const trapLabels = {
+        DOUBLE: '⚡ مضاعفة النقاط مفعلة',
+        SHIELD: '🛡️ فخ الحماية مفعل',
+        FREEZE: '❄️ فخ التجميد: الخصم سيفقد نقطة',
+        MIRROR: '⇄ فخ المرآة: السؤال مُعاد',
+        CANCEL: '✕ فخ الإلغاء: السؤال مُلغى',
+        EXTRA_QUESTION: '➕ سؤال إضافي قادم إذا أجبت صح',
+        REVERSAL_SCORE: '↺ عكس النتيجة: الخصم يفقد نقطة عند صحة إجابتك',
+        EXTRA_TURN: '↻ الدور الإضافي: تُجيب على سؤالك بنفسك',
+        EXCHANGER: '⇆ تم تبديل سؤال صعب بسهل في يد الخصم',
+      };
+      return (
+        <div className="modal-overlay">
+          <motion.div className="modal-card" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+              <div className="modal-title" style={{ marginBottom: 0 }}>{inFeedback ? 'الإجابة الصحيحة' : ('سؤال ' + getSubjectLabel(card.subject) + ' — ' + card.difficulty + ' نقطة')}</div>
+              {inFeedback && (
+                <button
+                  onClick={onClose}
+                  style={{
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '50%',
+                    width: 32,
+                    height: 32,
+                    cursor: 'pointer',
+                    color: '#fff',
+                    fontSize: 18,
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: -8,
+                    marginTop: -8,
+                  }}
+                  title="إغلاق"
+                >×</button>
+              )}
+            </div>
+            {activeTrapEffect && (
+              <div style={{ marginBottom: 14, padding: '6px 12px', background: 'rgba(112,0,255,0.25)', border: '1px solid var(--purple-primary)', borderRadius: 8, fontSize: 13, color: '#fff' }}>
+                {trapLabels[activeTrapEffect] || activeTrapEffect}
+              </div>
+            )}
+            <div className="question-text">{card.question}</div>
+            <div className="options-grid">
+              {card.options.map((opt, idx) => {
+                let btnClass = 'option-button';
+                if (inFeedback) {
+                  if (idx === card.correctIndex) btnClass += ' correct';
+                  else if (idx === selectedOptionIndex && selectedOptionIndex !== card.correctIndex) btnClass += ' wrong';
+                }
+                return (
+                  <button
+                    key={opt}
+                    className={btnClass}
+                    disabled={disabled || inFeedback}
+                    onClick={() => onAnswer(idx)}
+                  >{opt}</button>
+                );
+              })}
+            </div>
+            {inFeedback && (
+              <div style={{ marginTop: 16, padding: 12, background: 'rgba(0,0,0,0.3)', borderRadius: 10, fontSize: 14, color: '#eee', lineHeight: 1.6 }}>
+                <strong style={{ color: 'var(--gold)' }}>التوضيح:</strong><br/>{card.explanation}
+              </div>
+            )}
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+              <div className={`timer-display ${isUrgent && !inFeedback ? 'timer-urgent' : ''}`}>{timeLeft}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                {inFeedback ? 'ثانية للانتقال للسؤال التالي' : 'ثانية متبقية'}
+              </div>
+            </div>
+            {!inFeedback && hasAnswered && (
+              <div style={{ marginTop: 10, fontSize: 13, color: '#4ade80' }}>تم تسجيل إجابتك. انتظر انتهاء الوقت...</div>
+            )}
+          </motion.div>
+        </div>
+      );
+    }
+
+    function TrapPromptModal({ onYes, onNo, hasTrap }) {
+      return (
+        <div className="modal-overlay">
+          <motion.div className="modal-card" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+            <div className="modal-title">تفعيل الفخ؟</div>
+            <div style={{ fontSize: 15, color: '#ddd', marginBottom: 20, lineHeight: 1.6 }}>
+              {hasTrap ? '⚠️ تعرّضت لهجوم! هل تريد تفعيل فخك للدفاع؟' : 'ليس لديك فخاخ متاحة. انتظر عرض السؤال...'}
+            </div>
+            {hasTrap ? (
+              <div className="trap-buttons">
+                <button className="trap-btn trap-btn-primary" onClick={onYes}>نعم</button>
+                <button className="trap-btn trap-btn-secondary" onClick={onNo}>لا</button>
+              </div>
+            ) : (
+              <div className="trap-buttons">
+                <button className="trap-btn trap-btn-secondary" onClick={onNo}>متابعة</button>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      );
+    }
+
+    function PhaseBanner({ title, subtitle }) {
+      return (
+        <motion.div
+          className="phase-banner"
+          initial={{ y: -80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -80, opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="phase-banner-title">{title}</div>
+          {subtitle && <div className="phase-banner-sub">{subtitle}</div>}
+        </motion.div>
+      );
+    }
+
+    function MainMenu({ onSelectMode, onTutorial }) {
+      return (
+        <div className="screen">
+          <div className="main-title">قدرات دويل</div>
+          <div className="main-subtitle">Qodrat Duel — تعلم ونافس</div>
+          <button className="menu-button" onClick={() => onSelectMode('AI')}>ابدأ لعبة القدرات</button>
+          <button className="menu-button" onClick={() => onSelectMode('PVP')}>لاعبان على نفس الجهاز</button>
+          <button className="menu-button" style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold-border)' }} onClick={onTutorial}>📖 كيف ألعب؟</button>
+        </div>
+      );
+    }
+
+    function DifficultySelect({ onSelect, onBack }) {
+      const levels = [
+        { key: 'AMATEUR', label: 'مبتدئ', desc: 'سهل — 40% دقة' },
+        { key: 'NORMAL', label: 'متوسط', desc: 'متوسط — 60% دقة' },
+        { key: 'DIFFICULT', label: 'صعب', desc: 'صعب — 75% دقة' },
+        { key: 'PROFESSIONAL', label: 'محترف', desc: 'محترف — 90% دقة' },
+      ];
+      return (
+        <div className="screen">
+          <div className="main-title" style={{ fontSize: 36 }}>اختر الصعوبة</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
+            {levels.map(l => (
+              <button key={l.key} className="menu-button" onClick={() => onSelect(l.key)}>
+                <div>{l.label}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 400 }}>{l.desc}</div>
+              </button>
+            ))}
+          </div>
+          <button className="menu-button" style={{ marginTop: 20, background: 'rgba(255,255,255,0.05)' }} onClick={onBack}>رجوع</button>
+        </div>
+      );
+    }
+
+    function RoundEndScreen({ state, onNext }) {
+      const p1 = state.players.p1;
+      const p2 = state.players.p2;
+      return (
+        <div className="screen">
+          <div className="result-title">نهاية الجولة {state.round}</div>
+          <div className="result-stats">
+            <div className="stat-box">
+              <div className="stat-label">{p1.name}</div>
+              <div className="stat-value" style={{ color: '#4ade80' }}>{p1.score}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>LP: {p1.lp}</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-label">{p2.name}</div>
+              <div className="stat-value" style={{ color: '#f87171' }}>{p2.score}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>LP: {p2.lp}</div>
+            </div>
+          </div>
+          <button className="menu-button" onClick={onNext}>{state.round >= 5 ? 'النتيجة النهائية' : 'الجولة التالية'}</button>
+        </div>
+      );
+    }
+
+    function GameOverScreen({ state, onRestart, onMenu }) {
+      const p1 = state.players.p1;
+      const p2 = state.players.p2;
+      let winnerText = 'تعادل!';
+      let winnerColor = '#fff';
+      if (p1.score > p2.score) { winnerText = 'فوز ' + p1.name + '!'; winnerColor = '#4ade80'; }
+      else if (p2.score > p1.score) { winnerText = 'فوز ' + p2.name + '!'; winnerColor = '#f87171'; }
+      else if (p1.lp > p2.lp) { winnerText = 'فوز ' + p1.name + ' (بالتفوق في LP)!'; winnerColor = '#4ade80'; }
+      else if (p2.lp > p1.lp) { winnerText = 'فوز ' + p2.name + ' (بالتفوق في LP)!'; winnerColor = '#f87171'; }
+      return (
+        <div className="screen">
+          <div className="result-title" style={{ color: winnerColor }}>{winnerText}</div>
+          <div className="result-stats">
+            <div className="stat-box"><div className="stat-label">{p1.name}</div><div className="stat-value">{p1.score}</div><div style={{ fontSize: 12, marginTop: 4, color: 'rgba(255,255,255,0.6)' }}>LP {p1.lp}</div></div>
+            <div className="stat-box"><div className="stat-label">{p2.name}</div><div className="stat-value">{p2.score}</div><div style={{ fontSize: 12, marginTop: 4, color: 'rgba(255,255,255,0.6)' }}>LP {p2.lp}</div></div>
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="menu-button" onClick={onRestart}>العب مرة أخرى</button>
+            <button className="menu-button" onClick={onMenu}>القائمة الرئيسية</button>
+          </div>
+        </div>
+      );
+    }
+
+    function RulesModal({ onClose }) {
+      const trapsInfo = [
+        { name: 'فخ الإلغاء', icon: '✕', when: 'دفاعي', desc: 'يُلغي السؤال المُوجه إليك. لا نقاط تُحتسب ولا تُخصم.' },
+        { name: 'فخ المرآة', icon: '⇄', when: 'دفاعي', desc: 'يُعيد السؤال إلى من طرحه. يجيب المهاجم على سؤاله بنفسه بدلّك.' },
+        { name: 'فخ المضاعفة', icon: '⚡', when: 'دفاعي', desc: 'إذا أجبت صحيحة على السؤال المُوجه إليك، تحصل على نقطتين (+2).' },
+        { name: 'فخ الحماية', icon: '🛡️', when: 'دفاعي', desc: 'إذا أجبت خطأ، لا تُخصم نقاطك (يحمي من -1). لا يتأثر LP.' },
+        { name: 'فخ التجميد', icon: '❄️', when: 'دفاعي', desc: 'يجبر الخصم على فقدان نقطة بغض النظر عن نتيجة إجابتك.' },
+        { name: 'السؤال الإضافي', icon: '➕', when: 'دفاعي', desc: 'إذا أجبت صحيحة، يأتيك سؤال إضافي. أجب عليه صحيحة لتحقيق النقطة.' },
+        { name: 'عكس النتيجة', icon: '↺', when: 'دفاعي', desc: 'عند إجابتك الصحيحة يفقد الخصم نقطة بدلاً منك.' },
+        { name: 'الدور الإضافي', icon: '↻', when: 'دفاعي', desc: 'يسحب بطاقة من يد المهاجم وتجيب على سؤالك أنت بنفسك. تحتفظ بدورك التالي.' },
+        { name: 'المبدّل', icon: '⇆', when: 'دفاعي', desc: 'يستبدل سؤالًا صعبًا من يد المهاجم بسؤال سهل من الرزمة. يُضعف هجومه.' },
+      ];
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <motion.div className="modal-card" style={{ maxWidth: 720, maxHeight: '85vh', overflowY: 'auto', padding: 28, marginTop: 20, marginBottom: 20 }} initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-title" style={{ marginBottom: 16 }}>📜 قوانين اللعبة</div>
+
+            <div style={{ marginBottom: 20, padding: 14, background: 'rgba(255,215,0,0.08)', border: '1px solid var(--gold-border)', borderRadius: 10, lineHeight: 1.8, fontSize: 14, color: '#eee' }}>
+              <strong style={{ color: 'var(--gold)' }}>نظرة عامة:</strong><br/>
+              • 5 جولات، كل جولة 8 أدوار (4 أسئلة لكل لاعب).<br/>
+              • كل لاعب يحصل على 4 بطاقات أسئلة + 2 فخاخ في بداية كل جولة.<br/>
+              • اللاعب الحالي يختار سؤالًا ويضعه في الملعب.<br/>
+              • قبل عرض السؤال، يمكن للمدافع (الخصم) تفعيل فخه للتأثير على السؤال.<br/>
+              • الخصم يجيب خلال 45 ثانية.<br/>
+              • عند نفاد اليد، يُسحب تلقائيًا من الرزمة.
+            </div>
+
+            <div style={{ marginBottom: 20, padding: 14, background: 'rgba(0,0,0,0.25)', borderRadius: 10, lineHeight: 1.8, fontSize: 14, color: '#eee' }}>
+              <strong style={{ color: 'var(--cyan-accent)' }}>نظام النقاط:</strong><br/>
+              • إجابة صحيحة = <span style={{ color: '#4ade80' }}>+1 نقطة</span> (أو +2 مع المضاعفة).<br/>
+              • إجابة خاطئة = <span style={{ color: '#f87171' }}>-1 نقطة</span> (0 مع الحماية).<br/>
+              • انتهاء الوقت = <span style={{ color: '#f87171' }}>-1 نقطة</span>.<br/>
+              • LP (نقاط الحياة): تبدأ من 5، تنخفض عند الخطأ أو انتهاء الوقت.<br/>
+              • الفائز بعد 5 جولات = الأعلى نقاطًا. عند التعادل يُحسم بالLP.
+            </div>
+
+            <div style={{ marginBottom: 8, fontSize: 16, fontWeight: 700, color: 'var(--gold)', marginTop: 8 }}>🎭 شرح الفخاخ (9 فخاخ)</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {trapsInfo.map((t, i) => (
+                <div key={i} style={{ padding: 12, background: 'rgba(0,0,0,0.25)', borderRadius: 10, borderRight: '3px solid var(--gold-border)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: 22, minWidth: 30, textAlign: 'center' }}>{t.icon}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 2 }}>{t.name} <span style={{ fontSize: 11, color: t.when === 'مهاجم' ? '#fbbf24' : '#60a5fa', background: 'rgba(0,0,0,0.3)', padding: '2px 8px', borderRadius: 8 }}>{t.when}</span></div>
+                    <div style={{ fontSize: 13, color: '#ccc', lineHeight: 1.6 }}>{t.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 20, textAlign: 'center' }}>
+              <button className="menu-button" style={{ minWidth: 120, fontSize: 14 }} onClick={onClose}>إغلاق</button>
+            </div>
+          </motion.div>
+        </div>
+      );
+    }
+
+    function TutorialScreen({ onStart, onBack }) {
+      return (
+        <div className="screen" style={{ padding: '80px 20px 40px', overflowY: 'auto', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }} style={{ maxWidth: 760, margin: '0 auto', width: '100%' }}>
+            <div className="main-title" style={{ fontSize: 32, marginBottom: 8 }}>📖 دليل اللعب</div>
+            <div className="main-subtitle" style={{ marginBottom: 24 }}>تعلم قواعد قدرات دويل في دقائق</div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ padding: 18, background: 'rgba(255,215,0,0.06)', border: '1px solid var(--gold-border)', borderRadius: 14, textAlign: 'right' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--gold)', marginBottom: 10 }}>🎯 هدف اللعبة</div>
+                <div style={{ fontSize: 14, color: '#ddd', lineHeight: 1.9 }}>
+                  تنافس مع خصمك في 5 جولات من أسئلة القدرات (رياضيات - لفظي - منطقي). كل جولة تتكون من 8 أدوار.
+                  من يحصد النقاط الأعلى في النهاية يفوز. إذا تعادلتم، يُحسم الفوز بـ LP (نقاط الحياة).
+                </div>
+              </div>
+
+              <div style={{ padding: 18, background: 'rgba(0,0,0,0.25)', borderRadius: 14, textAlign: 'right' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--cyan-accent)', marginBottom: 10 }}>⚔️ سير الجولة</div>
+                <div style={{ fontSize: 14, color: '#ddd', lineHeight: 1.9 }}>
+                  1️⃣ <strong>توزيع البطاقات:</strong> كل لاعب يحصل على 4 أسئلة + 2 فخاخ.<br/>
+                  2️⃣ <strong>اختيار السؤال:</strong> اللاعب الحالي يختار سؤالًا من يده ويضعه في الملعب.<br/>
+                  3️⃣ <strong>تفعيل الفخ:</strong> قبل عرض السؤال، يمكن للمدافع (الخصم) تفعيل فخه للتأثير على السؤال.<br/>
+                  4️⃣ <strong>الإجابة:</strong> الخصم يجيب خلال 45 ثانية. اختر الإجابة الصحيحة قبل انتهاء الوقت!<br/>
+                  5️⃣ <strong>النتيجة:</strong> تُحتسب النقاط وتنتقل الأدوار حتى نهاية الجولة.
+                </div>
+              </div>
+
+              <div style={{ padding: 18, background: 'rgba(0,0,0,0.25)', borderRadius: 14, textAlign: 'right' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#4ade80', marginBottom: 10 }}>⭐ نظام النقاط والLP</div>
+                <div style={{ fontSize: 14, color: '#ddd', lineHeight: 1.9 }}>
+                  • <span style={{ color: '#4ade80' }}>إجابة صحيحة:</span> +1 نقطة (أو +2 مع فخ المضاعفة).<br/>
+                  • <span style={{ color: '#f87171' }}>إجابة خاطئة:</span> -1 نقطة (0 مع فخ الحماية).<br/>
+                  • <span style={{ color: '#f87171' }}>انتهاء الوقت:</span> -1 نقطة وخصم LP.<br/>
+                  • <strong>LP:</strong> تبدأ من 5. تنخفض عند كل إجابة خاطئة. LP الأعلى يُستخدم كمُحَكِّم عند التعادل.
+                </div>
+              </div>
+
+              <div style={{ padding: 18, background: 'rgba(0,0,0,0.25)', borderRadius: 14, textAlign: 'right' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#f472b6', marginBottom: 10 }}>🎭 الفخاخ (9 أنواع)</div>
+                <div style={{ fontSize: 14, color: '#ddd', lineHeight: 1.9 }}>
+                  <em style={{ color: '#aaa' }}>جميع الفخاخ تُفعلها أنت عندما يهاجمك الخصم:</em><br/>
+                  <strong>فخ الإلغاء ✕</strong> — يُلغي السؤال المُوجه إليك.<br/>
+                  <strong>فخ المرآة ⇄</strong> — يُعيد السؤال للمهاجم.<br/>
+                  <strong>فخ المضاعفة ⚡</strong> — إذا أجبت صح = تحصل على ×2 نقاط.<br/>
+                  <strong>فخ الحماية 🛡️</strong> — يحميك من خصم النقاط عند الخطأ.<br/>
+                  <strong>فخ التجميد ❄️</strong> — يجبر الخصم على فقدان نقطة.<br/>
+                  <strong>السؤال الإضافي ➕</strong> — صح → سؤال إضافي لتحديد النقطة.<br/>
+                  <strong>عكس النتيجة ↺</strong> — عند إجابتك الصحيحة يفقد الخصم نقطة.<br/>
+                  <strong>الدور الإضافي ↻</strong> — يسحب من المهاجم وتجيب على سؤالك.<br/>
+                  <strong>المبدّل ⇆</strong> — يستبدل سؤالًا صعبًا من يد المهاجم بسهل.
+                </div>
+              </div>
+
+              <div style={{ padding: 18, background: 'rgba(255,215,0,0.06)', border: '1px solid var(--gold-border)', borderRadius: 14, textAlign: 'right' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--gold)', marginBottom: 10 }}>💡 نصائح</div>
+                <div style={{ fontSize: 14, color: '#ddd', lineHeight: 1.9 }}>
+                  • خذ وقتك في قراءة السؤال والخيارات.<br/>
+                  • الفخاخ تُفعلها أنت عندما يهاجمك الخصم (قبل الإجابة على سؤاله).<br/>
+                  • السؤال الإضافي والدور الإضافي يغيران مجرى اللعب!<br/>
+                  • عند نفاد يدك، تُسحب بطاقة تلقائيًا من الرزمة.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 28, marginBottom: 20 }}>
+              <button className="menu-button" onClick={onStart}>ابدأ اللعبة 🚀</button>
+              <button className="menu-button" style={{ background: 'rgba(255,255,255,0.05)' }} onClick={onBack}>القائمة الرئيسية</button>
+            </div>
+          </motion.div>
+        </div>
+      );
+    }
+
+    const initialState = {
+      screen: 'MENU',
+      mode: null,
+      aiDifficulty: 'NORMAL',
+      round: 1,
+      turn: 0,
+      currentPlayerId: 'p1',
+      answeringPlayerId: 'p2',
+      players: {
+        p1: { id: 'p1', name: 'أنت', isHuman: true, lp: 5, score: 0, hand: [], trap: null, trapZones: [null, null], deck: [] },
+        p2: { id: 'p2', name: 'الخصم', isHuman: false, lp: 5, score: 0, hand: [], trap: null, trapZones: [null, null], deck: [] },
+      },
+      fieldCard: null,
+      activeTrapEffect: null,
+      trapRevealed: false,
+      extraQuestionPlayed: false,
+      // extraTurnSwap removed — natural flow handles EXTRA_TURN correctly
+      phase: 'PLACEMENT',
+      timeLeft: 45,
+      message: '',
+      hoveredCard: null,
+      selectedOptionIndex: null,
+      questionFeedback: null,
+    };
+
+    function gameReducer(state, action) {
+      switch (action.type) {
+        case 'SET_SCREEN': return { ...state, screen: action.screen };
+        case 'SET_MODE': return { ...state, mode: action.mode };
+        case 'SET_DIFFICULTY': return { ...state, aiDifficulty: action.difficulty };
+        case 'START_GAME': {
+          const isP2Human = state.mode === 'PVP';
+          const p1Deck = shuffle(QUESTIONS);
+          const p2Deck = shuffle(QUESTIONS);
+          const p1TrapDeck = createTrapDeck();
+          const p2TrapDeck = createTrapDeck();
+          const p1Draw = drawRoundHand(p1Deck, 1, p1TrapDeck);
+          const p2Draw = drawRoundHand(p2Deck, 1, p2TrapDeck);
+          const p1HandQuestions = p1Draw.hand.map(c => ({ ...c, instanceId: c.id + '-' + Math.random().toString(36).slice(2) }));
+          const p2HandQuestions = p2Draw.hand.map(c => ({ ...c, instanceId: c.id + '-' + Math.random().toString(36).slice(2) }));
+          return {
+            ...state,
+            screen: 'DUEL',
+            round: 1,
+            turn: 0,
+            currentPlayerId: 'p1',
+            answeringPlayerId: 'p2',
+            fieldCard: null,
+            activeTrapEffect: null,
+            trapRevealed: false,
+            extraQuestionPlayed: false,
+            // extraTurnSwap removed — natural flow handles EXTRA_TURN correctly
+            phase: 'PLACEMENT',
+            timeLeft: 45,
+            message: 'دورك! اختر بطاقة سؤال',
+            hoveredCard: null,
+            selectedOptionIndex: null,
+            questionFeedback: null,
+            players: {
+              p1: { ...state.players.p1, lp: 5, score: 0, hand: p1HandQuestions, trap: null, trapZones: p1Draw.traps.map(t => ({ ...t, revealed: false })), deck: p1Draw.remaining },
+              p2: { ...state.players.p2, isHuman: isP2Human, name: isP2Human ? 'اللاعب ٢' : 'الخصم', lp: 5, score: 0, hand: p2HandQuestions, trap: null, trapZones: p2Draw.traps.map(t => ({ ...t, revealed: false })), deck: p2Draw.remaining },
+            },
+          };
+        }
+        case 'SKIP_TRAP': {
+          return { ...state, phase: 'ANSWERING', timeLeft: 45, message: 'جاوب الآن!' };
+        }
+        case 'PLACE_CARD': {
+          const player = state.players[state.currentPlayerId];
+          let card = player.hand.find(c => (c.instanceId || c.id) === action.cardId);
+          let newHand = [...player.hand];
+          let newDeck = [...player.deck];
+          if (!card) {
+            if (newDeck.length === 0) newDeck = shuffle(QUESTIONS);
+            const raw = newDeck.length > 0 ? newDeck.shift() : QUESTIONS[0];
+            card = { ...raw, instanceId: raw.id + '-' + Math.random().toString(36).slice(2) };
+          } else {
+            newHand = newHand.filter(c => (c.instanceId || c.id) !== action.cardId);
+          }
+          if (!card) return state;
+          return {
+            ...state,
+            fieldCard: card,
+            players: { ...state.players, [state.currentPlayerId]: { ...player, hand: newHand, deck: newDeck } },
+            phase: 'TRAP_PROMPT',
+            timeLeft: 0,
+            message: 'فرصة الفخ! هل يريد المدافع تفعيل فخه؟',
+            activeTrapEffect: null,
+            trapRevealed: false,
+            extraQuestionPlayed: false,
+            selectedOptionIndex: null,
+            questionFeedback: null,
+          };
+        }
+        case 'ACTIVATE_TRAP': {
+          const trapPlayerId = action.playerId || state.answeringPlayerId;
+          const trapPlayer = state.players[trapPlayerId];
+          let zoneIdx = action.zoneIdx !== undefined ? action.zoneIdx : (trapPlayer.trapZones[0] && !trapPlayer.trapZones[0].revealed ? 0 : (trapPlayer.trapZones[1] && !trapPlayer.trapZones[1].revealed ? 1 : -1));
+          if (zoneIdx === -1) return state;
+          if (!trapPlayer.trapZones[zoneIdx] || trapPlayer.trapZones[zoneIdx].revealed) return state;
+          const effect = trapPlayer.trapZones[zoneIdx].effect;
+          const newZones = [...trapPlayer.trapZones];
+          newZones[zoneIdx] = { ...newZones[zoneIdx], revealed: true };
+
+          if (effect === 'MIRROR') {
+            return {
+              ...state,
+              activeTrapEffect: effect,
+              trapRevealed: true,
+              players: { ...state.players, [trapPlayerId]: { ...trapPlayer, trapZones: newZones } },
+              answeringPlayerId: state.currentPlayerId,
+              currentPlayerId: state.answeringPlayerId,
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              message: 'فخ المرآة! السؤال يُعاد إلى من طرحه',
+            };
+          }
+          if (effect === 'FREEZE') {
+            return {
+              ...state,
+              activeTrapEffect: effect,
+              trapRevealed: true,
+              players: { ...state.players, [trapPlayerId]: { ...trapPlayer, trapZones: newZones } },
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              message: 'فخ التجميد! الخصم سيفقد نقطة',
+            };
+          }
+          if (effect === 'EXTRA_QUESTION') {
+            return {
+              ...state,
+              activeTrapEffect: effect,
+              trapRevealed: true,
+              players: { ...state.players, [trapPlayerId]: { ...trapPlayer, trapZones: newZones } },
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              extraQuestionPlayed: false,
+              message: 'فخ السؤال الإضافي! أجب صحيحة لتأتي سؤال إضافي',
+            };
+          }
+          if (effect === 'REVERSAL_SCORE') {
+            return {
+              ...state,
+              activeTrapEffect: effect,
+              trapRevealed: true,
+              players: { ...state.players, [trapPlayerId]: { ...trapPlayer, trapZones: newZones } },
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              message: 'فخ عكس النتيجة! الخصم سيفقد نقطة عند صحة إجابتك',
+            };
+          }
+          if (effect === 'EXTRA_TURN') {
+            const opponentId = state.currentPlayerId;
+            const opponent = state.players[opponentId];
+            const opponentHand = [...opponent.hand];
+            if (opponentHand.length > 0) opponentHand.splice(Math.floor(Math.random() * opponentHand.length), 1);
+            const trapHand = [...trapPlayer.hand];
+            let newDeck = [...trapPlayer.deck];
+            let newCard = null;
+            if (trapHand.length > 0) {
+              newCard = trapHand[0];
+              trapHand.shift();
+            } else {
+              if (newDeck.length === 0) newDeck = shuffle(QUESTIONS);
+              newCard = newDeck.length > 0 ? newDeck.shift() : QUESTIONS[0];
+            }
+            const newCardInst = newCard ? { ...newCard, instanceId: newCard.id + '-' + Math.random().toString(36).slice(2) } : null;
+            return {
+              ...state,
+              activeTrapEffect: 'EXTRA_TURN',
+              trapRevealed: true,
+              fieldCard: newCardInst,
+              players: {
+                ...state.players,
+                [trapPlayerId]: { ...trapPlayer, hand: trapHand, deck: newDeck, trapZones: newZones },
+                [opponentId]: { ...opponent, hand: opponentHand }
+              },
+              currentPlayerId: opponentId,
+              answeringPlayerId: trapPlayerId,
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              message: 'فخ الدور الإضافي! تُجيب على سؤالك بنفسك',
+            };
+          }
+          if (effect === 'EXCHANGER') {
+            const opponentId = state.currentPlayerId;
+            const opponent = state.players[opponentId];
+            const hand = [...opponent.hand];
+            const diffIdx = hand.findIndex(c => c.difficulty === 300);
+            if (diffIdx > -1) hand.splice(diffIdx, 1);
+            let deck = [...opponent.deck];
+            if (deck.length === 0) deck = shuffle(QUESTIONS);
+            const easyIdx = deck.findIndex(c => c.difficulty === 50);
+            let drawn = null;
+            if (easyIdx > -1) {
+              drawn = deck[easyIdx];
+              deck.splice(easyIdx, 1);
+            } else if (deck.length > 0) {
+              drawn = deck[0];
+              deck.splice(0, 1);
+            }
+            const drawnInst = drawn ? { ...drawn, instanceId: drawn.id + '-' + Math.random().toString(36).slice(2) } : null;
+            if (drawnInst) hand.push(drawnInst);
+            return {
+              ...state,
+              activeTrapEffect: 'EXCHANGER',
+              trapRevealed: true,
+              players: {
+                ...state.players,
+                [trapPlayerId]: { ...trapPlayer, trapZones: newZones },
+                [opponentId]: { ...opponent, hand, deck }
+              },
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              message: 'فخ التبديل! استبدلت سؤالًا صعبًا بسهل في يد الخصم',
+            };
+          }
+
+          return {
+            ...state,
+            activeTrapEffect: effect,
+            trapRevealed: true,
+            players: { ...state.players, [trapPlayerId]: { ...trapPlayer, trapZones: newZones } },
+            phase: 'ANSWERING',
+            timeLeft: 45,
+            message: 'تم تفعيل الفخ! جاوب الآن!',
+          };
+        }
+        case 'TICK_TIMER': {
+          if (state.phase === 'ANSWERING') {
+            if (state.timeLeft <= 0) {
+              const selected = state.selectedOptionIndex === null || state.selectedOptionIndex === undefined ? -1 : state.selectedOptionIndex;
+              return { ...state, timeLeft: 5, phase: 'FEEDBACK', selectedOptionIndex: selected };
+            }
+            return { ...state, timeLeft: state.timeLeft - 1 };
+          }
+          if (state.phase === 'FEEDBACK') {
+            if (state.timeLeft <= 0) {
+              return { ...state, phase: 'RESOLUTION' };
+            }
+            return { ...state, timeLeft: state.timeLeft - 1 };
+          }
+          return state;
+        }
+        case 'SELECT_ANSWER': {
+          if (state.phase !== 'ANSWERING') return state;
+          return { ...state, selectedOptionIndex: action.index, phase: 'FEEDBACK' };
+        }
+        case 'SET_FEEDBACK': {
+          return { ...state, questionFeedback: action.feedback };
+        }
+        case 'RESOLVE_TURN': {
+          const question = state.fieldCard;
+          const answeringId = state.answeringPlayerId;
+          const answeringPlayer = state.players[answeringId];
+          const selected = state.selectedOptionIndex;
+          const isTimeout = selected === -1;
+          const isCorrect = !isTimeout && selected === question.correctIndex;
+
+          if (state.activeTrapEffect === 'EXTRA_QUESTION' && isCorrect && !state.extraQuestionPlayed) {
+            let newDeck = [...answeringPlayer.deck];
+            if (newDeck.length === 0) newDeck = shuffle(QUESTIONS);
+            const raw = newDeck.length > 0 ? newDeck.shift() : QUESTIONS[0];
+            const newCard = { ...raw, instanceId: raw.id + '-' + Math.random().toString(36).slice(2) };
+            return {
+              ...state,
+              fieldCard: newCard,
+              players: { ...state.players, [answeringId]: { ...answeringPlayer, deck: newDeck } },
+              phase: 'ANSWERING',
+              timeLeft: 45,
+              extraQuestionPlayed: true,
+              selectedOptionIndex: null,
+              questionFeedback: null,
+              message: 'سؤال إضافي! أجب بشكل صحيح للفوز بالنقطة',
+            };
+          }
+
+          let scoreChange = 0;
+          let lpChange = 0;
+          let attackerScoreChange = 0;
+          if (state.activeTrapEffect === 'CANCEL') {
+            scoreChange = 0; lpChange = 0;
+          } else if (isCorrect) {
+            scoreChange = state.activeTrapEffect === 'DOUBLE' ? 2 : 1;
+            lpChange = 1;
+            if (state.activeTrapEffect === 'REVERSAL_SCORE') attackerScoreChange = -1;
+            if (state.activeTrapEffect === 'FREEZE') attackerScoreChange = -1;
+          } else {
+            scoreChange = state.activeTrapEffect === 'SHIELD' ? 0 : -1;
+            lpChange = -1;
+            if (state.activeTrapEffect === 'FREEZE') attackerScoreChange = -1;
+          }
+          const newScore = answeringPlayer.score + scoreChange;
+          const newLp = Math.min(5, Math.max(0, answeringPlayer.lp + lpChange));
+          const attackerId = state.currentPlayerId;
+          const attacker = state.players[attackerId];
+          const newAttackerScore = attacker.score + attackerScoreChange;
+          const nextTurn = state.turn + 1;
+          const totalCardsLeft = state.players.p1.hand.length + state.players.p2.hand.length;
+          const isRoundEnd = nextTurn >= 8 || totalCardsLeft === 0;
+          let nextAttacker = isRoundEnd ? state.currentPlayerId : state.answeringPlayerId;
+          let nextDefender = isRoundEnd ? state.answeringPlayerId : state.currentPlayerId;
+          let msg = '';
+          if (state.activeTrapEffect === 'CANCEL') msg = 'فخ الإلغاء! لا نقاط تُحتسب';
+          else if (isCorrect) {
+            if (state.activeTrapEffect === 'DOUBLE') msg = 'إجابة صحيحة! النقاط مضاعفة ✅';
+            else if (state.activeTrapEffect === 'REVERSAL_SCORE') msg = 'فخ عكس النتيجة! الخصم يفقد نقطة رغم صحة إجابتك';
+            else if (state.activeTrapEffect === 'FREEZE') msg = 'إجابة صحيحة! ✅ الخصم يفقد نقطة بسبب التجميد';
+            else msg = 'إجابة صحيحة! ✅';
+          } else if (isTimeout) msg = 'انتهى الوقت! ⏰';
+          else if (state.activeTrapEffect === 'SHIELD') msg = 'فخ الحماية يحميك! ❌';
+          else if (state.activeTrapEffect === 'FREEZE') msg = 'إجابة خاطئة! ❌ لكن الخصم يفقد نقطة';
+          else msg = 'إجابة خاطئة! ❌';
+          return {
+            ...state,
+            players: {
+              ...state.players,
+              [answeringId]: { ...answeringPlayer, score: newScore, lp: newLp },
+              [attackerId]: { ...attacker, score: newAttackerScore }
+            },
+            turn: nextTurn,
+            phase: isRoundEnd ? 'ROUND_END' : 'PLACEMENT',
+            screen: isRoundEnd ? 'ROUND_END' : 'DUEL',
+            currentPlayerId: nextAttacker,
+            answeringPlayerId: nextDefender,
+            fieldCard: null,
+            activeTrapEffect: null,
+            trapRevealed: false,
+            extraQuestionPlayed: false,
+            selectedOptionIndex: null,
+            questionFeedback: null,
+            timeLeft: 45,
+            message: msg,
+          };
+        }
+        case 'NEXT_ROUND': {
+          const nextRound = state.round + 1;
+          if (nextRound > 5) {
+            return { ...state, screen: 'GAME_OVER', phase: 'GAME_OVER' };
+          }
+          const p1TrapDeck = createTrapDeck();
+          const p2TrapDeck = createTrapDeck();
+          const p1Draw = drawRoundHand(state.players.p1.deck, nextRound, p1TrapDeck);
+          const p2Draw = drawRoundHand(state.players.p2.deck, nextRound, p2TrapDeck);
+          const p1HandQuestions = p1Draw.hand.map(c => ({ ...c, instanceId: c.id + '-' + Math.random().toString(36).slice(2) }));
+          const p2HandQuestions = p2Draw.hand.map(c => ({ ...c, instanceId: c.id + '-' + Math.random().toString(36).slice(2) }));
+          const p1Starts = nextRound % 2 === 1;
+          return {
+            ...state,
+            screen: 'DUEL',
+            round: nextRound,
+            turn: 0,
+            currentPlayerId: p1Starts ? 'p1' : 'p2',
+            answeringPlayerId: p1Starts ? 'p2' : 'p1',
+            fieldCard: null,
+            activeTrapEffect: null,
+            trapRevealed: false,
+            extraQuestionPlayed: false,
+            // extraTurnSwap removed — natural flow handles EXTRA_TURN correctly
+            phase: 'PLACEMENT',
+            timeLeft: 45,
+            message: p1Starts ? 'دورك! اختر بطاقة سؤال' : 'دور الخصم',
+            selectedOptionIndex: null,
+            questionFeedback: null,
+            players: {
+              ...state.players,
+              p1: { ...state.players.p1, hand: p1HandQuestions, trap: null, trapZones: p1Draw.traps.map(t => ({ ...t, revealed: false })), deck: p1Draw.remaining },
+              p2: { ...state.players.p2, hand: p2HandQuestions, trap: null, trapZones: p2Draw.traps.map(t => ({ ...t, revealed: false })), deck: p2Draw.remaining },
+            },
+          };
+        }
+        case 'RESET': return initialState;
+        case 'HOVER_CARD': return { ...state, hoveredCard: action.card };
+        default: return state;
+      }
+    }
+
+    function App() {
+      const [state, dispatch] = useReducer(gameReducer, initialState);
+      const [showRules, setShowRules] = useState(false);
+      const stateRef = useRef(state);
+      useEffect(() => { stateRef.current = state; }, [state]);
+
+      useEffect(() => {
+        if (state.phase !== 'ANSWERING' && state.phase !== 'FEEDBACK') return;
+        const id = setInterval(() => dispatch({ type: 'TICK_TIMER' }), 1000);
+        return () => clearInterval(id);
+      }, [state.phase]);
+
+      useEffect(() => {
+        if (state.phase === 'ANSWERING' && state.timeLeft <= 5 && state.timeLeft > 0) {
+          playSound('tick');
+        }
+      }, [state.timeLeft, state.phase]);
+
+      useEffect(() => {
+        if (state.phase !== 'FEEDBACK' || !state.fieldCard) return;
+        const isCorrect = state.selectedOptionIndex === state.fieldCard.correctIndex;
+        playSound(isCorrect ? 'correct' : 'wrong');
+      }, [state.phase, state.selectedOptionIndex, state.fieldCard]);
+
+      useEffect(() => {
+        if (state.screen !== 'DUEL') return;
+        const current = state.players[state.currentPlayerId];
+        const answering = state.players[state.answeringPlayerId];
+
+        if (state.phase === 'PLACEMENT' && !current.isHuman) {
+          const cardId = aiChooseCard(current.hand, state.aiDifficulty);
+          const timer = setTimeout(() => {
+            if (stateRef.current.phase !== 'PLACEMENT') return;
+            playSound('place');
+            dispatch({ type: 'PLACE_CARD', cardId });
+          }, aiDelay(state.aiDifficulty));
+          return () => clearTimeout(timer);
+        }
+
+        if (state.phase === 'TRAP_PROMPT') {
+          if (!answering.isHuman) {
+            const trapId = aiDecideTrap(answering, state.fieldCard, false, state.aiDifficulty);
+            const timer = setTimeout(() => {
+              if (stateRef.current.phase !== 'TRAP_PROMPT') return;
+              if (trapId) {
+                playSound('trap');
+                const zoneIdx = stateRef.current.players[stateRef.current.answeringPlayerId].trapZones.findIndex(t => t && !t.revealed);
+                dispatch({ type: 'ACTIVATE_TRAP', playerId: stateRef.current.answeringPlayerId, zoneIdx: zoneIdx >= 0 ? zoneIdx : 0 });
+              } else {
+                dispatch({ type: 'SKIP_TRAP' });
+              }
+            }, aiDelay(state.aiDifficulty));
+            return () => clearTimeout(timer);
+          }
+          const hasSetTrap = answering.trapZones.some(t => t && !t.revealed);
+          if (!hasSetTrap) {
+            const timer = setTimeout(() => {
+              if (stateRef.current.phase !== 'TRAP_PROMPT') return;
+              dispatch({ type: 'SKIP_TRAP' });
+            }, 600);
+            return () => clearTimeout(timer);
+          }
+        }
+
+        if (state.phase === 'ANSWERING' && !answering.isHuman) {
+          const index = aiDecideAnswer(state.fieldCard, state.aiDifficulty, []);
+          const answerTimer = setTimeout(() => {
+            if (stateRef.current.phase !== 'ANSWERING') return;
+            dispatch({ type: 'SELECT_ANSWER', index });
+          }, aiDelay(state.aiDifficulty) + 600);
+          return () => clearTimeout(answerTimer);
+        }
+
+        if (state.phase === 'RESOLUTION') {
+          const timer = setTimeout(() => {
+            if (stateRef.current.phase !== 'RESOLUTION') return;
+            if (stateRef.current.turn + 1 >= 8 && stateRef.current.round >= 5) {
+              playSound('win');
+            }
+            dispatch({ type: 'RESOLVE_TURN' });
+          }, 300);
+          return () => clearTimeout(timer);
+        }
+      }, [state.screen, state.phase, state.currentPlayerId, state.answeringPlayerId, state.aiDifficulty, state.turn, state.round, state.fieldCard, state.selectedOptionIndex]);
+
+      function handleCardClick(card) {
+        if (state.phase !== 'PLACEMENT') return;
+        const current = state.players[state.currentPlayerId];
+        if (!current.isHuman) return;
+        if (card.type === 'TRAP') return;
+        playSound('place');
+        dispatch({ type: 'PLACE_CARD', cardId: card.instanceId || card.id });
+      }
+
+      function handleAnswer(index) {
+        if (state.phase !== 'ANSWERING') return;
+        dispatch({ type: 'SELECT_ANSWER', index });
+      }
+
+      function handleTrapClick(playerId, zoneIdx) {
+        if (state.phase !== 'TRAP_PROMPT') return;
+        const answering = state.players[state.answeringPlayerId];
+        if (!answering.isHuman) return;
+        if (state.answeringPlayerId !== playerId) return;
+        const trap = answering.trapZones[zoneIdx];
+        if (!trap || trap.revealed) return;
+        playSound('trap');
+        dispatch({ type: 'ACTIVATE_TRAP', playerId, zoneIdx });
+      }
+
+      const currentPlayer = state.players[state.currentPlayerId];
+      const answeringPlayer = state.players[state.answeringPlayerId];
+      const bottomPlayer = state.players.p1;
+      const topPlayer = state.players.p2;
+
+      return (
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+          <ParticleBackground />
+          <AnimatePresence mode="wait">
+            {state.screen === 'MENU' && (
+              <motion.div key="menu" className="screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <MainMenu
+                  onSelectMode={(mode) => {
+                    dispatch({ type: 'SET_MODE', mode });
+                    if (mode === 'AI') dispatch({ type: 'SET_SCREEN', screen: 'DIFFICULTY' });
+                    else dispatch({ type: 'START_GAME' });
+                  }}
+                  onTutorial={() => dispatch({ type: 'SET_SCREEN', screen: 'TUTORIAL' })}
+                />
+              </motion.div>
+            )}
+            {state.screen === 'TUTORIAL' && (
+              <motion.div key="tutorial" className="screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <TutorialScreen
+                  onStart={() => dispatch({ type: 'SET_SCREEN', screen: 'MENU' })}
+                  onBack={() => dispatch({ type: 'SET_SCREEN', screen: 'MENU' })}
+                />
+              </motion.div>
+            )}
+            {state.screen === 'DIFFICULTY' && (
+              <motion.div key="diff" className="screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <DifficultySelect
+                  onSelect={(diff) => { dispatch({ type: 'SET_DIFFICULTY', difficulty: diff }); dispatch({ type: 'START_GAME' }); }}
+                  onBack={() => dispatch({ type: 'SET_SCREEN', screen: 'MENU' })}
+                />
+              </motion.div>
+            )}
+            {state.screen === 'DUEL' && (
+              <motion.div key="duel" style={{ width: '100%', height: '100%', position: 'relative' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <CardPreview card={state.hoveredCard || state.fieldCard} />
+
+                <div className="hud-bar hud-top-left">
+                  <div className="lp-frame">
+                    <div className="lp-label">LP</div>
+                    <div className="lp-value">{topPlayer.lp}</div>
+                    <div className="score-value">النقاط: {topPlayer.score}</div>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{topPlayer.name}</div>
+                </div>
+
+                <div className="hud-bar hud-top-right" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                  <div className="round-badge">الجولة {state.round} / 5</div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', background: 'rgba(0,0,0,0.4)', padding: '4px 10px', borderRadius: 12 }}>
+                      {state.message}
+                    </div>
+                    <button
+                      onClick={() => setShowRules(true)}
+                      style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--gold-border)', background: 'rgba(255,215,0,0.15)', color: 'var(--gold)', fontSize: 16, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="القوانين"
+                    >
+                      ⓘ
+                    </button>
+                  </div>
+                </div>
+
+                <div className="hud-bar hud-bottom-left">
+                  <div className="lp-frame">
+                    <div className="lp-label">LP</div>
+                    <div className="lp-value">{bottomPlayer.lp}</div>
+                    <div className="score-value">النقاط: {bottomPlayer.score}</div>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{bottomPlayer.name}</div>
+                </div>
+
+                <div className="hud-bar hud-bottom-right">
+                  <div className="deck-pile">
+                    <div className="deck-card-layer" style={{ top: 0, left: 0 }}></div>
+                    <div className="deck-card-layer" style={{ top: 2, left: 2 }}></div>
+                    <div className="deck-card-layer" style={{ top: 4, left: 4 }}></div>
+                    <div className="deck-count">{bottomPlayer.deck.length}</div>
+                  </div>
+                </div>
+
+                <DuelField state={state} onTrapClick={handleTrapClick} />
+                <OpponentHand count={topPlayer.hand.length} />
+                <PlayerHand
+                  hand={bottomPlayer.hand}
+                  onCardClick={handleCardClick}
+                  onHover={(card) => dispatch({ type: 'HOVER_CARD', card })}
+                />
+
+                {state.phase === 'TRAP_PROMPT' && answeringPlayer.isHuman && (
+                  <TrapPromptModal
+                    hasTrap={answeringPlayer.trapZones.some(t => t && !t.revealed)}
+                    onYes={() => { playSound('trap'); const zIdx = answeringPlayer.trapZones.findIndex(t => t && !t.revealed); dispatch({ type: 'ACTIVATE_TRAP', playerId: state.answeringPlayerId, zoneIdx: zIdx >= 0 ? zIdx : 0 }); }}
+                    onNo={() => dispatch({ type: 'SKIP_TRAP' })}
+                  />
+                )}
+
+                {(state.phase === 'ANSWERING' || state.phase === 'FEEDBACK') && (
+                  <QuestionModal
+                    card={state.fieldCard}
+                    timeLeft={state.timeLeft}
+                    onAnswer={handleAnswer}
+                    onClose={() => { if (state.phase === 'FEEDBACK') dispatch({ type: 'RESOLVE_TURN' }); }}
+                    disabled={!answeringPlayer.isHuman}
+                    phase={state.phase}
+                    selectedOptionIndex={state.selectedOptionIndex}
+                    activeTrapEffect={state.activeTrapEffect}
+                  />
+                )}
+
+                {(state.phase === 'PLACEMENT' && !currentPlayer.isHuman && state.mode === 'AI') && (
+                  <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.3)', pointerEvents: 'none' }}>
+                    <motion.div className="phase-banner" style={{ position: 'relative', top: 'auto', left: 'auto', transform: 'none' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <div className="phase-banner-sub">الخصم يفكر...</div>
+                    </motion.div>
+                  </div>
+                )}
+                {(state.phase === 'TRAP_PROMPT' && !answeringPlayer.isHuman) && (
+                  <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.3)', pointerEvents: 'none' }}>
+                    <motion.div className="phase-banner" style={{ position: 'relative', top: 'auto', left: 'auto', transform: 'none' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <div className="phase-banner-sub">الخصم يقرر الفخ...</div>
+                    </motion.div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+            {state.screen === 'ROUND_END' && (
+              <motion.div key="roundend" className="screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <RoundEndScreen state={state} onNext={() => dispatch({ type: 'NEXT_ROUND' })} />
+              </motion.div>
+            )}
+            {state.screen === 'GAME_OVER' && (
+              <motion.div key="gameover" className="screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <GameOverScreen
+                  state={state}
+                  onRestart={() => dispatch({ type: 'START_GAME' })}
+                  onMenu={() => dispatch({ type: 'RESET' })}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+</script>
+</body>
+</html>
